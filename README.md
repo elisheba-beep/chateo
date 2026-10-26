@@ -1,17 +1,52 @@
 # chateo
 
-A new Flutter project.
+a chat application made using flutter.
 
-## Getting Started
+## table of contents
 
-This project is a starting point for a Flutter application.
+- [about the project](#-about-the-project)
+- [built with](#-built-with)
+- [getting started](#-getting-started)
+- [usage](#-usage)
 
-A few resources to get you started if this is your first Flutter project:
+## about the project
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+this is a very simple chat application, created to have one on one conversations with users registered on the application.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## built with
+
+this is a flutter project. state management using riverpod and firebase firestore for the backend.
+
+- [futter](https://docs.flutter.dev/get-started/learn-flutter)
+- [riverpod](https://riverpod.dev/docs/introduction/getting_started)
+- [firebase](https://console.firebase.google.com/)
+
+## getting started
+
+to get a copy of this project, follow these instructions.
+
+### prerequisites
+
+before running, make sure you have these installed
+- [flutter sdk](https://flutter.dev)
+- [dart sdk](https://dart.dev)
+- an ide such as [vs code](https://visualstudio.com)
+- a physical device or simulator
+
+### installation
+
+```bash
+flutter pub get
+dart run build_runner build
+```
+
+## usage
+
+to run in development mode
+
+```bash
+flutter devices
+flutter run -d <device_id> #run on a specific device
+flutter run -d all #run on all available devices
+```
+
