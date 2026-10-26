@@ -17,7 +17,7 @@ this is a very simple chat application, created to have one on one conversations
 
 this is a flutter project. state management using riverpod and firebase firestore for the backend.
 
-- [futter](https://docs.flutter.dev/get-started/learn-flutter)
+- [flutter](https://docs.flutter.dev/get-started/learn-flutter)
 - [riverpod](https://riverpod.dev/docs/introduction/getting_started)
 - [firebase](https://console.firebase.google.com/)
 
