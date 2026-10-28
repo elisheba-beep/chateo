@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-
+import 'package:material_ui/material_ui.dart';
 
 /// Chat Bar Input Field
 /// The persistent UI layout wrapper anchoring the bottom of chat thread pages.
@@ -24,14 +23,18 @@ class ChateoChatInputBar extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      color: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF0F1828), // AppColors base background
+      color: isLight
+          ? const Color(0xFFFFFFFF)
+          : const Color(0xFF0F1828), // AppColors base background
       child: SafeArea(
         child: Row(
           children: [
             IconButton(
               icon: Icon(
                 Icons.add,
-                color: isLight ? const Color(0xFFADB5BD) : const Color(0xFFFFFFFF),
+                color: isLight
+                    ? const Color(0xFFADB5BD)
+                    : const Color(0xFFFFFFFF),
                 size: 24,
               ),
               onPressed: onAttachPressed,
@@ -53,8 +56,13 @@ class ChateoChatInputBar extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                   ),
                   filled: true,
-                  fillColor: isLight ? const Color(0xFFF7F7FC) : const Color(0xFF10141E), // AppColors.offWhite
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  fillColor: isLight
+                      ? const Color(0xFFF7F7FC)
+                      : const Color(0xFF10141E), // AppColors.offWhite
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,

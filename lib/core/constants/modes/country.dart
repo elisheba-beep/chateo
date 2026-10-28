@@ -1,31 +1,291 @@
 import 'dart:convert';
 
 class Country {
+  const Country({required this.name, required this.alpha2Code, required this.callingCode});
   final String name;
-  final String alpha2Code; // e.g., "US", "NG"
+  final String alpha2Code;
+  final String callingCode; // digits only, e.g. "234", "1684"
 
-  const Country({required this.name, required this.alpha2Code});
+  factory Country.fromMap(Map<String, dynamic> m) => Country(
+        name: m['name'] as String,
+        alpha2Code: m['alpha2'] as String, 
+        callingCode: (m['calling_code'] as String).replaceAll(RegExp(r'\D'), ''),
+      );
 
-  String get flagAssetPath => 'assets/flags/${alpha2Code.toLowerCase()}.png';
+  String get dialCode => '+$callingCode';
 
-  // Factory constructor to cleanly parse your raw JSON map entries
-  factory Country.fromMap(Map<String, dynamic> map) {
-    return Country(
-      name: map['name'] ?? '',
-      alpha2Code: map['alpha-2'] ?? '', // Match this to your JSON key
-    );
-  }
+  String get flagEmoji => String.fromCharCodes(
+        alpha2Code.toUpperCase().codeUnits.map((c) => c + 127397),
+      );
+
+  @override
+  bool operator ==(Object other) => other is Country && other.alpha2Code == alpha2Code;
+  @override
+  int get hashCode => alpha2Code.hashCode;
 }
 
-class CountryConstants {
-  CountryConstants._();
+class CountryData {
+  CountryData._();
 
   static const String rawCountriesJson = '''
-  [{"name":"Afghanistan","alpha-2":"AF","country-code":"004"},{"name":"Åland Islands","alpha-2":"AX","country-code":"248"},{"name":"Albania","alpha-2":"AL","country-code":"008"},{"name":"Algeria","alpha-2":"DZ","country-code":"012"},{"name":"American Samoa","alpha-2":"AS","country-code":"016"},{"name":"Andorra","alpha-2":"AD","country-code":"020"},{"name":"Angola","alpha-2":"AO","country-code":"024"},{"name":"Anguilla","alpha-2":"AI","country-code":"660"},{"name":"Antarctica","alpha-2":"AQ","country-code":"010"},{"name":"Antigua and Barbuda","alpha-2":"AG","country-code":"028"},{"name":"Argentina","alpha-2":"AR","country-code":"032"},{"name":"Armenia","alpha-2":"AM","country-code":"051"},{"name":"Aruba","alpha-2":"AW","country-code":"533"},{"name":"Australia","alpha-2":"AU","country-code":"036"},{"name":"Austria","alpha-2":"AT","country-code":"040"},{"name":"Azerbaijan","alpha-2":"AZ","country-code":"031"},{"name":"Bahamas","alpha-2":"BS","country-code":"044"},{"name":"Bahrain","alpha-2":"BH","country-code":"048"},{"name":"Bangladesh","alpha-2":"BD","country-code":"050"},{"name":"Barbados","alpha-2":"BB","country-code":"052"},{"name":"Belarus","alpha-2":"BY","country-code":"112"},{"name":"Belgium","alpha-2":"BE","country-code":"056"},{"name":"Belize","alpha-2":"BZ","country-code":"084"},{"name":"Benin","alpha-2":"BJ","country-code":"204"},{"name":"Bermuda","alpha-2":"BM","country-code":"060"},{"name":"Bhutan","alpha-2":"BT","country-code":"064"},{"name":"Bolivia, Plurinational State of","alpha-2":"BO","country-code":"068"},{"name":"Bonaire, Sint Eustatius and Saba","alpha-2":"BQ","country-code":"535"},{"name":"Bosnia and Herzegovina","alpha-2":"BA","country-code":"070"},{"name":"Botswana","alpha-2":"BW","country-code":"072"},{"name":"Bouvet Island","alpha-2":"BV","country-code":"074"},{"name":"Brazil","alpha-2":"BR","country-code":"076"},{"name":"British Indian Ocean Territory","alpha-2":"IO","country-code":"086"},{"name":"Brunei Darussalam","alpha-2":"BN","country-code":"096"},{"name":"Bulgaria","alpha-2":"BG","country-code":"100"},{"name":"Burkina Faso","alpha-2":"BF","country-code":"854"},{"name":"Burundi","alpha-2":"BI","country-code":"108"},{"name":"Cabo Verde","alpha-2":"CV","country-code":"132"},{"name":"Cambodia","alpha-2":"KH","country-code":"116"},{"name":"Cameroon","alpha-2":"CM","country-code":"120"},{"name":"Canada","alpha-2":"CA","country-code":"124"},{"name":"Cayman Islands","alpha-2":"KY","country-code":"136"},{"name":"Central African Republic","alpha-2":"CF","country-code":"140"},{"name":"Chad","alpha-2":"TD","country-code":"148"},{"name":"Chile","alpha-2":"CL","country-code":"152"},{"name":"China","alpha-2":"CN","country-code":"156"},{"name":"Christmas Island","alpha-2":"CX","country-code":"162"},{"name":"Cocos (Keeling) Islands","alpha-2":"CC","country-code":"166"},{"name":"Colombia","alpha-2":"CO","country-code":"170"},{"name":"Comoros","alpha-2":"KM","country-code":"174"},{"name":"Congo","alpha-2":"CG","country-code":"178"},{"name":"Congo, Democratic Republic of the","alpha-2":"CD","country-code":"180"},{"name":"Cook Islands","alpha-2":"CK","country-code":"184"},{"name":"Costa Rica","alpha-2":"CR","country-code":"188"},{"name":"Côte d'Ivoire","alpha-2":"CI","country-code":"384"},{"name":"Croatia","alpha-2":"HR","country-code":"191"},{"name":"Cuba","alpha-2":"CU","country-code":"192"},{"name":"Curaçao","alpha-2":"CW","country-code":"531"},{"name":"Cyprus","alpha-2":"CY","country-code":"196"},{"name":"Czechia","alpha-2":"CZ","country-code":"203"},{"name":"Denmark","alpha-2":"DK","country-code":"208"},{"name":"Djibouti","alpha-2":"DJ","country-code":"262"},{"name":"Dominica","alpha-2":"DM","country-code":"212"},{"name":"Dominican Republic","alpha-2":"DO","country-code":"214"},{"name":"Ecuador","alpha-2":"EC","country-code":"218"},{"name":"Egypt","alpha-2":"EG","country-code":"818"},{"name":"El Salvador","alpha-2":"SV","country-code":"222"},{"name":"Equatorial Guinea","alpha-2":"GQ","country-code":"226"},{"name":"Eritrea","alpha-2":"ER","country-code":"232"},{"name":"Estonia","alpha-2":"EE","country-code":"233"},{"name":"Eswatini","alpha-2":"SZ","country-code":"748"},{"name":"Ethiopia","alpha-2":"ET","country-code":"231"},{"name":"Falkland Islands (Malvinas)","alpha-2":"FK","country-code":"238"},{"name":"Faroe Islands","alpha-2":"FO","country-code":"234"},{"name":"Fiji","alpha-2":"FJ","country-code":"242"},{"name":"Finland","alpha-2":"FI","country-code":"246"},{"name":"France","alpha-2":"FR","country-code":"250"},{"name":"French Guiana","alpha-2":"GF","country-code":"254"},{"name":"French Polynesia","alpha-2":"PF","country-code":"258"},{"name":"French Southern Territories","alpha-2":"TF","country-code":"260"},{"name":"Gabon","alpha-2":"GA","country-code":"266"},{"name":"Gambia","alpha-2":"GM","country-code":"270"},{"name":"Georgia","alpha-2":"GE","country-code":"268"},{"name":"Germany","alpha-2":"DE","country-code":"276"},{"name":"Ghana","alpha-2":"GH","country-code":"288"},{"name":"Gibraltar","alpha-2":"GI","country-code":"292"},{"name":"Greece","alpha-2":"GR","country-code":"300"},{"name":"Greenland","alpha-2":"GL","country-code":"304"},{"name":"Grenada","alpha-2":"GD","country-code":"308"},{"name":"Guadeloupe","alpha-2":"GP","country-code":"312"},{"name":"Guam","alpha-2":"GU","country-code":"316"},{"name":"Guatemala","alpha-2":"GT","country-code":"320"},{"name":"Guernsey","alpha-2":"GG","country-code":"831"},{"name":"Guinea","alpha-2":"GN","country-code":"324"},{"name":"Guinea-Bissau","alpha-2":"GW","country-code":"624"},{"name":"Guyana","alpha-2":"GY","country-code":"328"},{"name":"Haiti","alpha-2":"HT","country-code":"332"},{"name":"Heard Island and McDonald Islands","alpha-2":"HM","country-code":"334"},{"name":"Holy See","alpha-2":"VA","country-code":"336"},{"name":"Honduras","alpha-2":"HN","country-code":"340"},{"name":"Hong Kong","alpha-2":"HK","country-code":"344"},{"name":"Hungary","alpha-2":"HU","country-code":"348"},{"name":"Iceland","alpha-2":"IS","country-code":"352"},{"name":"India","alpha-2":"IN","country-code":"356"},{"name":"Indonesia","alpha-2":"ID","country-code":"360"},{"name":"Iran, Islamic Republic of","alpha-2":"IR","country-code":"364"},{"name":"Iraq","alpha-2":"IQ","country-code":"368"},{"name":"Ireland","alpha-2":"IE","country-code":"372"},{"name":"Isle of Man","alpha-2":"IM","country-code":"833"},{"name":"Israel","alpha-2":"IL","country-code":"376"},{"name":"Italy","alpha-2":"IT","country-code":"380"},{"name":"Jamaica","alpha-2":"JM","country-code":"388"},{"name":"Japan","alpha-2":"JP","country-code":"392"},{"name":"Jersey","alpha-2":"JE","country-code":"832"},{"name":"Jordan","alpha-2":"JO","country-code":"400"},{"name":"Kazakhstan","alpha-2":"KZ","country-code":"398"},{"name":"Kenya","alpha-2":"KE","country-code":"404"},{"name":"Kiribati","alpha-2":"KI","country-code":"296"},{"name":"Korea, Democratic People's Republic of","alpha-2":"KP","country-code":"408"},{"name":"Korea, Republic of","alpha-2":"KR","country-code":"410"},{"name":"Kuwait","alpha-2":"KW","country-code":"414"},{"name":"Kyrgyzstan","alpha-2":"KG","country-code":"417"},{"name":"Lao People's Democratic Republic","alpha-2":"LA","country-code":"418"},{"name":"Latvia","alpha-2":"LV","country-code":"428"},{"name":"Lebanon","alpha-2":"LB","country-code":"422"},{"name":"Lesotho","alpha-2":"LS","country-code":"426"},{"name":"Liberia","alpha-2":"LR","country-code":"430"},{"name":"Libya","alpha-2":"LY","country-code":"434"},{"name":"Liechtenstein","alpha-2":"LI","country-code":"438"},{"name":"Lithuania","alpha-2":"LT","country-code":"440"},{"name":"Luxembourg","alpha-2":"LU","country-code":"442"},{"name":"Macao","alpha-2":"MO","country-code":"446"},{"name":"Madagascar","alpha-2":"MG","country-code":"450"},{"name":"Malawi","alpha-2":"MW","country-code":"454"},{"name":"Malaysia","alpha-2":"MY","country-code":"458"},{"name":"Maldives","alpha-2":"MV","country-code":"462"},{"name":"Mali","alpha-2":"ML","country-code":"466"},{"name":"Malta","alpha-2":"MT","country-code":"470"},{"name":"Marshall Islands","alpha-2":"MH","country-code":"584"},{"name":"Martinique","alpha-2":"MQ","country-code":"474"},{"name":"Mauritania","alpha-2":"MR","country-code":"478"},{"name":"Mauritius","alpha-2":"MU","country-code":"480"},{"name":"Mayotte","alpha-2":"YT","country-code":"175"},{"name":"Mexico","alpha-2":"MX","country-code":"484"},{"name":"Micronesia, Federated States of","alpha-2":"FM","country-code":"583"},{"name":"Moldova, Republic of","alpha-2":"MD","country-code":"498"},{"name":"Monaco","alpha-2":"MC","country-code":"492"},{"name":"Mongolia","alpha-2":"MN","country-code":"496"},{"name":"Montenegro","alpha-2":"ME","country-code":"499"},{"name":"Montserrat","alpha-2":"MS","country-code":"500"},{"name":"Morocco","alpha-2":"MA","country-code":"504"},{"name":"Mozambique","alpha-2":"MZ","country-code":"508"},{"name":"Myanmar","alpha-2":"MM","country-code":"104"},{"name":"Namibia","alpha-2":"NA","country-code":"516"},{"name":"Nauru","alpha-2":"NR","country-code":"520"},{"name":"Nepal","alpha-2":"NP","country-code":"524"},{"name":"Netherlands, Kingdom of the","alpha-2":"NL","country-code":"528"},{"name":"New Caledonia","alpha-2":"NC","country-code":"540"},{"name":"New Zealand","alpha-2":"NZ","country-code":"554"},{"name":"Nicaragua","alpha-2":"NI","country-code":"558"},{"name":"Niger","alpha-2":"NE","country-code":"562"},{"name":"Nigeria","alpha-2":"NG","country-code":"566"},{"name":"Niue","alpha-2":"NU","country-code":"570"},{"name":"Norfolk Island","alpha-2":"NF","country-code":"574"},{"name":"North Macedonia","alpha-2":"MK","country-code":"807"},{"name":"Northern Mariana Islands","alpha-2":"MP","country-code":"580"},{"name":"Norway","alpha-2":"NO","country-code":"578"},{"name":"Oman","alpha-2":"OM","country-code":"512"},{"name":"Pakistan","alpha-2":"PK","country-code":"586"},{"name":"Palau","alpha-2":"PW","country-code":"585"},{"name":"Palestine, State of","alpha-2":"PS","country-code":"275"},{"name":"Panama","alpha-2":"PA","country-code":"591"},{"name":"Papua New Guinea","alpha-2":"PG","country-code":"598"},{"name":"Paraguay","alpha-2":"PY","country-code":"600"},{"name":"Peru","alpha-2":"PE","country-code":"604"},{"name":"Philippines","alpha-2":"PH","country-code":"608"},{"name":"Pitcairn","alpha-2":"PN","country-code":"612"},{"name":"Poland","alpha-2":"PL","country-code":"616"},{"name":"Portugal","alpha-2":"PT","country-code":"620"},{"name":"Puerto Rico","alpha-2":"PR","country-code":"630"},{"name":"Qatar","alpha-2":"QA","country-code":"634"},{"name":"Réunion","alpha-2":"RE","country-code":"638"},{"name":"Romania","alpha-2":"RO","country-code":"642"},{"name":"Russian Federation","alpha-2":"RU","country-code":"643"},{"name":"Rwanda","alpha-2":"RW","country-code":"646"},{"name":"Saint Barthélemy","alpha-2":"BL","country-code":"652"},{"name":"Saint Helena, Ascension and Tristan da Cunha","alpha-2":"SH","country-code":"654"},{"name":"Saint Kitts and Nevis","alpha-2":"KN","country-code":"659"},{"name":"Saint Lucia","alpha-2":"LC","country-code":"662"},{"name":"Saint Martin (French part)","alpha-2":"MF","country-code":"663"},{"name":"Saint Pierre and Miquelon","alpha-2":"PM","country-code":"666"},{"name":"Saint Vincent and the Grenadines","alpha-2":"VC","country-code":"670"},{"name":"Samoa","alpha-2":"WS","country-code":"882"},{"name":"San Marino","alpha-2":"SM","country-code":"674"},{"name":"Sao Tome and Principe","alpha-2":"ST","country-code":"678"},{"name":"Saudi Arabia","alpha-2":"SA","country-code":"682"},{"name":"Senegal","alpha-2":"SN","country-code":"686"},{"name":"Serbia","alpha-2":"RS","country-code":"688"},{"name":"Seychelles","alpha-2":"SC","country-code":"690"},{"name":"Sierra Leone","alpha-2":"SL","country-code":"694"},{"name":"Singapore","alpha-2":"SG","country-code":"702"},{"name":"Sint Maarten (Dutch part)","alpha-2":"SX","country-code":"534"},{"name":"Slovakia","alpha-2":"SK","country-code":"703"},{"name":"Slovenia","alpha-2":"SI","country-code":"705"},{"name":"Solomon Islands","alpha-2":"SB","country-code":"090"},{"name":"Somalia","alpha-2":"SO","country-code":"706"},{"name":"South Africa","alpha-2":"ZA","country-code":"710"},{"name":"South Georgia and the South Sandwich Islands","alpha-2":"GS","country-code":"239"},{"name":"South Sudan","alpha-2":"SS","country-code":"728"},{"name":"Spain","alpha-2":"ES","country-code":"724"},{"name":"Sri Lanka","alpha-2":"LK","country-code":"144"},{"name":"Sudan","alpha-2":"SD","country-code":"729"},{"name":"Suriname","alpha-2":"SR","country-code":"740"},{"name":"Svalbard and Jan Mayen","alpha-2":"SJ","country-code":"744"},{"name":"Sweden","alpha-2":"SE","country-code":"752"},{"name":"Switzerland","alpha-2":"CH","country-code":"756"},{"name":"Syrian Arab Republic","alpha-2":"SY","country-code":"760"},{"name":"Taiwan, Province of China","alpha-2":"TW","country-code":"158"},{"name":"Tajikistan","alpha-2":"TJ","country-code":"762"},{"name":"Tanzania, United Republic of","alpha-2":"TZ","country-code":"834"},{"name":"Thailand","alpha-2":"TH","country-code":"764"},{"name":"Timor-Leste","alpha-2":"TL","country-code":"626"},{"name":"Togo","alpha-2":"TG","country-code":"768"},{"name":"Tokelau","alpha-2":"TK","country-code":"772"},{"name":"Tonga","alpha-2":"TO","country-code":"776"},{"name":"Trinidad and Tobago","alpha-2":"TT","country-code":"780"},{"name":"Tunisia","alpha-2":"TN","country-code":"788"},{"name":"Türkiye","alpha-2":"TR","country-code":"792"},{"name":"Turkmenistan","alpha-2":"TM","country-code":"795"},{"name":"Turks and Caicos Islands","alpha-2":"TC","country-code":"796"},{"name":"Tuvalu","alpha-2":"TV","country-code":"798"},{"name":"Uganda","alpha-2":"UG","country-code":"800"},{"name":"Ukraine","alpha-2":"UA","country-code":"804"},{"name":"United Arab Emirates","alpha-2":"AE","country-code":"784"},{"name":"United Kingdom of Great Britain and Northern Ireland","alpha-2":"GB","country-code":"826"},{"name":"United States of America","alpha-2":"US","country-code":"840"},{"name":"United States Minor Outlying Islands","alpha-2":"UM","country-code":"581"},{"name":"Uruguay","alpha-2":"UY","country-code":"858"},{"name":"Uzbekistan","alpha-2":"UZ","country-code":"860"},{"name":"Vanuatu","alpha-2":"VU","country-code":"548"},{"name":"Venezuela, Bolivarian Republic of","alpha-2":"VE","country-code":"862"},{"name":"Viet Nam","alpha-2":"VN","country-code":"704"},{"name":"Virgin Islands (British)","alpha-2":"VG","country-code":"092"},{"name":"Virgin Islands (U.S.)","alpha-2":"VI","country-code":"850"},{"name":"Wallis and Futuna","alpha-2":"WF","country-code":"876"},{"name":"Western Sahara","alpha-2":"EH","country-code":"732"},{"name":"Yemen","alpha-2":"YE","country-code":"887"},{"name":"Zambia","alpha-2":"ZM","country-code":"894"},{"name":"Zimbabwe","alpha-2":"ZW","country-code":"716"}]
-  ''';
+[
+  {"name": "Afghanistan", "alpha2": "AF", "calling_code": "+93"},
+  {"name": "Albania", "alpha2": "AL", "calling_code": "+355"},
+  {"name": "Algeria", "alpha2": "DZ", "calling_code": "+213"},
+  {"name": "American Samoa", "alpha2": "AS", "calling_code": "+1-684"},
+  {"name": "Andorra", "alpha2": "AD", "calling_code": "+376"},
+  {"name": "Angola", "alpha2": "AO", "calling_code": "+244"},
+  {"name": "Anguilla", "alpha2": "AI", "calling_code": "+1-264"},
+  {"name": "Antarctica", "alpha2": "AQ", "calling_code": "+672"},
+  {"name": "Antigua and Barbuda", "alpha2": "AG", "calling_code": "+1-268"},
+  {"name": "Argentina", "alpha2": "AR", "calling_code": "+54"},
+  {"name": "Armenia", "alpha2": "AM", "calling_code": "+374"},
+  {"name": "Aruba", "alpha2": "AW", "calling_code": "+297"},
+  {"name": "Australia", "alpha2": "AU", "calling_code": "+61"},
+  {"name": "Austria", "alpha2": "AT", "calling_code": "+43"},
+  {"name": "Azerbaijan", "alpha2": "AZ", "calling_code": "+994"},
+  {"name": "Bahamas", "alpha2": "BS", "calling_code": "+1-242"},
+  {"name": "Bahrain", "alpha2": "BH", "calling_code": "+973"},
+  {"name": "Bangladesh", "alpha2": "BD", "calling_code": "+880"},
+  {"name": "Barbados", "alpha2": "BB", "calling_code": "+1-246"},
+  {"name": "Belarus", "alpha2": "BY", "calling_code": "+375"},
+  {"name": "Belgium", "alpha2": "BE", "calling_code": "+32"},
+  {"name": "Belize", "alpha2": "BZ", "calling_code": "+501"},
+  {"name": "Benin", "alpha2": "BJ", "calling_code": "+229"},
+  {"name": "Bermuda", "alpha2": "BM", "calling_code": "+1-441"},
+  {"name": "Bhutan", "alpha2": "BT", "calling_code": "+975"},
+  {"name": "Bolivia", "alpha2": "BO", "calling_code": "+591"},
+  {"name": "Bosnia and Herzegovina", "alpha2": "BA", "calling_code": "+387"},
+  {"name": "Botswana", "alpha2": "BW", "calling_code": "+267"},
+  {"name": "Bouvet Island", "alpha2": "BV", "calling_code": "+47"},
+  {"name": "Brazil", "alpha2": "BR", "calling_code": "+55"},
+  {"name": "British Indian Ocean Territory", "alpha2": "IO", "calling_code": "+246"},
+  {"name": "British Virgin Islands", "alpha2": "VG", "calling_code": "+1-284"},
+  {"name": "Brunei", "alpha2": "BN", "calling_code": "+673"},
+  {"name": "Bulgaria", "alpha2": "BG", "calling_code": "+359"},
+  {"name": "Burkina Faso", "alpha2": "BF", "calling_code": "+226"},
+  {"name": "Burundi", "alpha2": "BI", "calling_code": "+257"},
+  {"name": "Cambodia", "alpha2": "KH", "calling_code": "+855"},
+  {"name": "Cameroon", "alpha2": "CM", "calling_code": "+237"},
+  {"name": "Canada", "alpha2": "CA", "calling_code": "+1"},
+  {"name": "Cape Verde", "alpha2": "CV", "calling_code": "+238"},
+  {"name": "Cayman Islands", "alpha2": "KY", "calling_code": "+1-345"},
+  {"name": "Central African Republic", "alpha2": "CF", "calling_code": "+236"},
+  {"name": "Chad", "alpha2": "TD", "calling_code": "+235"},
+  {"name": "Chile", "alpha2": "CL", "calling_code": "+56"},
+  {"name": "China", "alpha2": "CN", "calling_code": "+86"},
+  {"name": "Christmas Island", "alpha2": "CX", "calling_code": "+61"},
+  {"name": "Cocos Islands", "alpha2": "CC", "calling_code": "+61"},
+  {"name": "Colombia", "alpha2": "CO", "calling_code": "+57"},
+  {"name": "Comoros", "alpha2": "KM", "calling_code": "+269"},
+  {"name": "Congo", "alpha2": "CG", "calling_code": "+242"},
+  {"name": "Cook Islands", "alpha2": "CK", "calling_code": "+682"},
+  {"name": "Costa Rica", "alpha2": "CR", "calling_code": "+506"},
+  {"name": "Croatia", "alpha2": "HR", "calling_code": "+385"},
+  {"name": "Cuba", "alpha2": "CU", "calling_code": "+53"},
+  {"name": "Curacao", "alpha2": "CW", "calling_code": "+599"},
+  {"name": "Cyprus", "alpha2": "CY", "calling_code": "+357"},
+  {"name": "Czech Republic", "alpha2": "CZ", "calling_code": "+420"},
+  {"name": "Democratic Republic of the Congo", "alpha2": "CD", "calling_code": "+243"},
+  {"name": "Denmark", "alpha2": "DK", "calling_code": "+45"},
+  {"name": "Djibouti", "alpha2": "DJ", "calling_code": "+253"},
+  {"name": "Dominica", "alpha2": "DM", "calling_code": "+1-767"},
+  {"name": "Dominican Republic", "alpha2": "DO", "calling_code": "+1-809"},
+  {"name": "East Timor", "alpha2": "TL", "calling_code": "+670"},
+  {"name": "Ecuador", "alpha2": "EC", "calling_code": "+593"},
+  {"name": "Egypt", "alpha2": "EG", "calling_code": "+20"},
+  {"name": "El Salvador", "alpha2": "SV", "calling_code": "+503"},
+  {"name": "Equatorial Guinea", "alpha2": "GQ", "calling_code": "+240"},
+  {"name": "Eritrea", "alpha2": "ER", "calling_code": "+291"},
+  {"name": "Estonia", "alpha2": "EE", "calling_code": "+372"},
+  {"name": "Eswatini", "alpha2": "SZ", "calling_code": "+268"},
+  {"name": "Ethiopia", "alpha2": "ET", "calling_code": "+251"},
+  {"name": "Falkland Islands", "alpha2": "FK", "calling_code": "+500"},
+  {"name": "Faroe Islands", "alpha2": "FO", "calling_code": "+298"},
+  {"name": "Fiji", "alpha2": "FJ", "calling_code": "+679"},
+  {"name": "Finland", "alpha2": "FI", "calling_code": "+358"},
+  {"name": "France", "alpha2": "FR", "calling_code": "+33"},
+  {"name": "French Guiana", "alpha2": "GF", "calling_code": "+594"},
+  {"name": "French Polynesia", "alpha2": "PF", "calling_code": "+689"},
+  {"name": "Gabon", "alpha2": "GA", "calling_code": "+241"},
+  {"name": "Gambia", "alpha2": "GM", "calling_code": "+220"},
+  {"name": "Georgia", "alpha2": "GE", "calling_code": "+995"},
+  {"name": "Germany", "alpha2": "DE", "calling_code": "+49"},
+  {"name": "Ghana", "alpha2": "GH", "calling_code": "+233"},
+  {"name": "Gibraltar", "alpha2": "GI", "calling_code": "+350"},
+  {"name": "Greece", "alpha2": "GR", "calling_code": "+30"},
+  {"name": "Greenland", "alpha2": "GL", "calling_code": "+299"},
+  {"name": "Grenada", "alpha2": "GD", "calling_code": "+1-473"},
+  {"name": "Guadeloupe", "alpha2": "GP", "calling_code": "+590"},
+  {"name": "Guam", "alpha2": "GU", "calling_code": "+1-671"},
+  {"name": "Guatemala", "alpha2": "GT", "calling_code": "+502"},
+  {"name": "Guernsey", "alpha2": "GG", "calling_code": "+44-1481"},
+  {"name": "Guinea", "alpha2": "GN", "calling_code": "+224"},
+  {"name": "Guinea-Bissau", "alpha2": "GW", "calling_code": "+245"},
+  {"name": "Guyana", "alpha2": "GY", "calling_code": "+592"},
+  {"name": "Haiti", "alpha2": "HT", "calling_code": "+509"},
+  {"name": "Honduras", "alpha2": "HN", "calling_code": "+504"},
+  {"name": "Hong Kong", "alpha2": "HK", "calling_code": "+852"},
+  {"name": "Hungary", "alpha2": "HU", "calling_code": "+36"},
+  {"name": "Iceland", "alpha2": "IS", "calling_code": "+354"},
+  {"name": "India", "alpha2": "IN", "calling_code": "+91"},
+  {"name": "Indonesia", "alpha2": "ID", "calling_code": "+62"},
+  {"name": "Iran", "alpha2": "IR", "calling_code": "+98"},
+  {"name": "Iraq", "alpha2": "IQ", "calling_code": "+964"},
+  {"name": "Ireland", "alpha2": "IE", "calling_code": "+353"},
+  {"name": "Isle of Man", "alpha2": "IM", "calling_code": "+44-1624"},
+  {"name": "Israel", "alpha2": "IL", "calling_code": "+972"},
+  {"name": "Italy", "alpha2": "IT", "calling_code": "+39"},
+  {"name": "Ivory Coast", "alpha2": "CI", "calling_code": "+225"},
+  {"name": "Jamaica", "alpha2": "JM", "calling_code": "+1-876"},
+  {"name": "Japan", "alpha2": "JP", "calling_code": "+81"},
+  {"name": "Jersey", "alpha2": "JE", "calling_code": "+44-1534"},
+  {"name": "Jordan", "alpha2": "JO", "calling_code": "+962"},
+  {"name": "Kazakhstan", "alpha2": "KZ", "calling_code": "+7"},
+  {"name": "Kenya", "alpha2": "KE", "calling_code": "+254"},
+  {"name": "Kiribati", "alpha2": "KI", "calling_code": "+686"},
+  {"name": "Kosovo", "alpha2": "XK", "calling_code": "+383"},
+  {"name": "Kuwait", "alpha2": "KW", "calling_code": "+965"},
+  {"name": "Kyrgyzstan", "alpha2": "KG", "calling_code": "+996"},
+  {"name": "Laos", "alpha2": "LA", "calling_code": "+856"},
+  {"name": "Latvia", "alpha2": "LV", "calling_code": "+371"},
+  {"name": "Lebanon", "alpha2": "LB", "calling_code": "+961"},
+  {"name": "Lesotho", "alpha2": "LS", "calling_code": "+266"},
+  {"name": "Liberia", "alpha2": "LR", "calling_code": "+231"},
+  {"name": "Libya", "alpha2": "LY", "calling_code": "+218"},
+  {"name": "Liechtenstein", "alpha2": "LI", "calling_code": "+423"},
+  {"name": "Lithuania", "alpha2": "LT", "calling_code": "+370"},
+  {"name": "Luxembourg", "alpha2": "LU", "calling_code": "+352"},
+  {"name": "Macau", "alpha2": "MO", "calling_code": "+853"},
+  {"name": "Madagascar", "alpha2": "MG", "calling_code": "+261"},
+  {"name": "Malawi", "alpha2": "MW", "calling_code": "+265"},
+  {"name": "Malaysia", "alpha2": "MY", "calling_code": "+60"},
+  {"name": "Maldives", "alpha2": "MV", "calling_code": "+960"},
+  {"name": "Mali", "alpha2": "ML", "calling_code": "+223"},
+  {"name": "Malta", "alpha2": "MT", "calling_code": "+356"},
+  {"name": "Marshall Islands", "alpha2": "MH", "calling_code": "+692"},
+  {"name": "Martinique", "alpha2": "MQ", "calling_code": "+596"},
+  {"name": "Mauritania", "alpha2": "MR", "calling_code": "+222"},
+  {"name": "Mauritius", "alpha2": "MU", "calling_code": "+230"},
+  {"name": "Mayotte", "alpha2": "YT", "calling_code": "+262"},
+  {"name": "Mexico", "alpha2": "MX", "calling_code": "+52"},
+  {"name": "Micronesia", "alpha2": "FM", "calling_code": "+691"},
+  {"name": "Moldova", "alpha2": "MD", "calling_code": "+373"},
+  {"name": "Monaco", "alpha2": "MC", "calling_code": "+377"},
+  {"name": "Mongolia", "alpha2": "MN", "calling_code": "+976"},
+  {"name": "Montenegro", "alpha2": "ME", "calling_code": "+382"},
+  {"name": "Montserrat", "alpha2": "MS", "calling_code": "+1-664"},
+  {"name": "Morocco", "alpha2": "MA", "calling_code": "+212"},
+  {"name": "Mozambique", "alpha2": "MZ", "calling_code": "+258"},
+  {"name": "Myanmar", "alpha2": "MM", "calling_code": "+95"},
+  {"name": "Namibia", "alpha2": "NA", "calling_code": "+264"},
+  {"name": "Nauru", "alpha2": "NR", "calling_code": "+674"},
+  {"name": "Nepal", "alpha2": "NP", "calling_code": "+977"},
+  {"name": "Netherlands", "alpha2": "NL", "calling_code": "+31"},
+  {"name": "New Caledonia", "alpha2": "NC", "calling_code": "+687"},
 
-  static List<Country> get countries {
-    final List<dynamic> decoded = jsonDecode(rawCountriesJson);
-    return decoded.map((item) => Country.fromMap(item)).toList();
+{"name": "New Zealand", "alpha2": "NZ", "calling_code": "+64"},
+{"name": "Nicaragua", "alpha2": "NI", "calling_code": "+505"},
+{"name": "Niger", "alpha2": "NE", "calling_code": "+227"},
+{"name": "Nigeria", "alpha2": "NG", "calling_code": "+234"},
+{"name": "Niue", "alpha2": "NU", "calling_code": "+683"},
+{"name": "Norfolk Island", "alpha2": "NF", "calling_code": "+672"},
+{"name": "North Korea", "alpha2": "KP", "calling_code": "+850"},
+{"name": "North Macedonia", "alpha2": "MK", "calling_code": "+389"},
+{"name": "Northern Mariana Islands", "alpha2": "MP", "calling_code": "+1-670"},
+{"name": "Norway", "alpha2": "NO", "calling_code": "+47"},
+{"name": "Oman", "alpha2": "OM", "calling_code": "+968"},
+{"name": "Pakistan", "alpha2": "PK", "calling_code": "+92"},
+{"name": "Palau", "alpha2": "PW", "calling_code": "+680"},
+{"name": "Palestine", "alpha2": "PS", "calling_code": "+970"},
+{"name": "Panama", "alpha2": "PA", "calling_code": "+507"},
+{"name": "Papua New Guinea", "alpha2": "PG", "calling_code": "+675"},
+{"name": "Paraguay", "alpha2": "PY", "calling_code": "+595"},
+{"name": "Peru", "alpha2": "PE", "calling_code": "+51"},
+{"name": "Philippines", "alpha2": "PH", "calling_code": "+63"},
+{"name": "Pitcairn", "alpha2": "PN", "calling_code": "+64"},
+{"name": "Poland", "alpha2": "PL", "calling_code": "+48"},
+{"name": "Portugal", "alpha2": "PT", "calling_code": "+351"},
+{"name": "Puerto Rico", "alpha2": "PR", "calling_code": "+1-787"},
+{"name": "Qatar", "alpha2": "QA", "calling_code": "+974"},
+{"name": "Reunion", "alpha2": "RE", "calling_code": "+262"},
+{"name": "Romania", "alpha2": "RO", "calling_code": "+40"},
+{"name": "Russia", "alpha2": "RU", "calling_code": "+7"},
+{"name": "Rwanda", "alpha2": "RW", "calling_code": "+250"},
+{"name": "Saint Barthélemy", "alpha2": "BL", "calling_code": "+590"},
+{"name": "Saint Helena", "alpha2": "SH", "calling_code": "+290"},
+{"name": "Saint Kitts and Nevis", "alpha2": "KN", "calling_code": "+1-869"},
+{"name": "Saint Lucia", "alpha2": "LC", "calling_code": "+1-758"},
+{"name": "Saint Martin", "alpha2": "MF", "calling_code": "+590"},
+{"name": "Saint Pierre and Miquelon", "alpha2": "PM", "calling_code": "+508"},
+{"name": "Saint Vincent and the Grenadines", "alpha2": "VC", "calling_code": "+1-784"},
+{"name": "Samoa", "alpha2": "WS", "calling_code": "+685"},
+{"name": "San Marino", "alpha2": "SM", "calling_code": "+378"},
+{"name": "Sao Tome and Principe", "alpha2": "ST", "calling_code": "+239"},
+{"name": "Saudi Arabia", "alpha2": "SA", "calling_code": "+966"},
+{"name": "Senegal", "alpha2": "SN", "calling_code": "+221"},
+{"name": "Serbia", "alpha2": "RS", "calling_code": "+381"},
+{"name": "Seychelles", "alpha2": "SC", "calling_code": "+248"},
+{"name": "Sierra Leone", "alpha2": "SL", "calling_code": "+232"},
+{"name": "Singapore", "alpha2": "SG", "calling_code": "+65"},
+{"name": "Sint Maarten", "alpha2": "SX", "calling_code": "+1-721"},
+{"name": "Slovakia", "alpha2": "SK", "calling_code": "+421"},
+{"name": "Slovenia", "alpha2": "SI", "calling_code": "+386"},
+{"name": "Solomon Islands", "alpha2": "SB", "calling_code": "+677"},
+{"name": "Somalia", "alpha2": "SO", "calling_code": "+252"},
+{"name": "South Africa", "alpha2": "ZA", "calling_code": "+27"},
+{"name": "South Korea", "alpha2": "KR", "calling_code": "+82"},
+{"name": "South Sudan", "alpha2": "SS", "calling_code": "+211"},
+{"name": "Spain", "alpha2": "ES", "calling_code": "+34"},
+{"name": "Sri Lanka", "alpha2": "LK", "calling_code": "+94"},
+{"name": "Sudan", "alpha2": "SD", "calling_code": "+249"},
+{"name": "Suriname", "alpha2": "SR", "calling_code": "+597"},
+{"name": "Svalbard and Jan Mayen", "alpha2": "SJ", "calling_code": "+47"},
+{"name": "Sweden", "alpha2": "SE", "calling_code": "+46"},
+{"name": "Switzerland", "alpha2": "CH", "calling_code": "+41"},
+{"name": "Syria", "alpha2": "SY", "calling_code": "+963"},
+{"name": "Taiwan", "alpha2": "TW", "calling_code": "+886"},
+{"name": "Tajikistan", "alpha2": "TJ", "calling_code": "+992"},
+{"name": "Tanzania", "alpha2": "TZ", "calling_code": "+255"},
+{"name": "Thailand", "alpha2": "TH", "calling_code": "+66"},
+{"name": "Togo", "alpha2": "TG", "calling_code": "+228"},
+{"name": "Tokelau", "alpha2": "TK", "calling_code": "+690"},
+{"name": "Tonga", "alpha2": "TO", "calling_code": "+676"},
+{"name": "Trinidad and Tobago", "alpha2": "TT", "calling_code": "+1-868"},
+{"name": "Tunisia", "alpha2": "TN", "calling_code": "+216"},
+{"name": "Turkey", "alpha2": "TR", "calling_code": "+90"},
+{"name": "Turkmenistan", "alpha2": "TM", "calling_code": "+993"},
+{"name": "Turks and Caicos Islands", "alpha2": "TC", "calling_code": "+1-649"},
+{"name": "Tuvalu", "alpha2": "TV", "calling_code": "+688"},
+{"name": "U.S. Virgin Islands", "alpha2": "VI", "calling_code": "+1-340"},
+{"name": "Uganda", "alpha2": "UG", "calling_code": "+256"},
+{"name": "Ukraine", "alpha2": "UA", "calling_code": "+380"},
+{"name": "United Arab Emirates", "alpha2": "AE", "calling_code": "+971"},
+{"name": "United Kingdom", "alpha2": "GB", "calling_code": "+44"},
+{"name": "United States", "alpha2": "US", "calling_code": "+1"},
+{"name": "Uruguay", "alpha2": "UY", "calling_code": "+598"},
+{"name": "Uzbekistan", "alpha2": "UZ", "calling_code": "+998"},
+{"name": "Vanuatu", "alpha2": "VU", "calling_code": "+678"},
+{"name": "Vatican", "alpha2": "VA", "calling_code": "+379"},
+{"name": "Venezuela", "alpha2": "VE", "calling_code": "+58"},
+{"name": "Vietnam", "alpha2": "VN", "calling_code": "+84"},
+{"name": "Wallis and Futuna", "alpha2": "WF", "calling_code": "+681"},
+{"name": "Western Sahara", "alpha2": "EH", "calling_code": "+212"},
+{"name": "Yemen", "alpha2": "YE", "calling_code": "+967"},
+{"name": "Zambia", "alpha2": "ZM", "calling_code": "+260"},
+{"name": "Zimbabwe", "alpha2": "ZW", "calling_code": "+263"}
+]
+  ''';
+ static final List<Country> all = (jsonDecode(rawCountriesJson) as List)
+      .map((e) => Country.fromMap(e as Map<String, dynamic>))
+      .toList()
+    ..sort((a, b) => a.name.compareTo(b.name));
+
+  static Country? byAlpha2(String? code) {
+    if (code == null) return null;
+    for (final c in all) {
+      if (c.alpha2Code == code.toUpperCase()) return c;
+    }
+    return null;
   }
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Indented Chat Item Divider
 /// Perfect for message feed screens. It indents the divider line so it lines up

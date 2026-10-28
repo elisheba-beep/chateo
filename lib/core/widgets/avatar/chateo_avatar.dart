@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:chateo/core/theme/app_colors.dart';
+import 'package:material_ui/material_ui.dart';
 
-/// Chateo Avatar Component
-/// Displays a user profile picture slot with an optional live status dot indicator.
+import 'dart:convert';
+
 class ChateoAvatar extends StatelessWidget {
   final String? imageUrl;
+  final String? base64Image;
+  final String? initials;
   final double radius;
   final bool isOnline;
   final VoidCallback? onTap;
@@ -11,7 +14,9 @@ class ChateoAvatar extends StatelessWidget {
   const ChateoAvatar({
     super.key,
     this.imageUrl,
-    this.radius = 28,
+    this.base64Image,
+    this.initials,
+    this.radius = 48,
     this.isOnline = false,
     this.onTap,
   });
@@ -21,20 +26,45 @@ class ChateoAvatar extends StatelessWidget {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
 
+    ImageProvider? getAvatarImage() {
+      if (imageUrl != null && imageUrl!.isNotEmpty) {
+        return NetworkImage(imageUrl!);
+      }
+      if (base64Image != null && base64Image!.isNotEmpty) {
+        return MemoryImage(base64Decode(base64Image!));
+      }
+      return null;
+    }
+
+    final avatarImage = getAvatarImage();
+
     return GestureDetector(
       onTap: onTap,
       child: Stack(
         children: [
           CircleAvatar(
             radius: radius,
-            backgroundColor: isLight ? const Color(0xFFF7F7FC) : const Color(0xFF10141E), // AppColors.offWhite
-            backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
-            child: imageUrl == null
-                ? Icon(
-                    Icons.person_outline_rounded,
-                    size: radius * 0.9,
-                    color: const Color(0xFFADB5BD), // AppColors.muted
-                  )
+            backgroundColor: isLight
+                ? AppColors.offWhiteLight
+                : AppColors.offWhiteDark,
+            backgroundImage: avatarImage,
+            child: avatarImage == null
+                ? (initials != null && initials!.isNotEmpty)
+                      ? Text(
+                          initials!.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: radius * 0.7,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(
+                              0xFF002DE3,
+                            ), // Primary Brand Color
+                          ),
+                        )
+                      : Icon(
+                          Icons.person_outline_rounded,
+                          size: radius * 0.9,
+                          color: const Color(0xFFADB5BD),
+                        )
                 : null,
           ),
           if (isOnline)
@@ -48,7 +78,11 @@ class ChateoAvatar extends StatelessWidget {
                   color: const Color(0xFF2CC069), // AppColors.success
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF0F1828), // Matches Scaffold Background
+                    color: isLight
+                        ? const Color(0xFFFFFFFF)
+                        : const Color(
+                            0xFF0F1828,
+                          ), // Matches Scaffold Background
                     width: 2,
                   ),
                 ),
@@ -59,7 +93,3 @@ class ChateoAvatar extends StatelessWidget {
     );
   }
 }
-
-
-
-

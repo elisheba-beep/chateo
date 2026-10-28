@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AppColors {
   AppColors._();
@@ -23,7 +23,7 @@ class AppColors {
   static const Color bodyDark = Color(0xFFE5E5E5);
   static const Color mutedDark = Color(0xFFADB5BD);
   static const Color lineDark = Color(0xFF152033);
-  static const Color offWhiteDark = Color(0xFF10141E);
+  static const Color offWhiteDark = Color(0xFF1B2B48);
   static const Color backgroundDark = Color(0xFF0F1828);
 
   // Accent / System Colors

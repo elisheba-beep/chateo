@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:chateo/core/theme/app_colors.dart';
+import 'package:material_ui/material_ui.dart';
 
-/// Standard Input Field 
+/// Standard Input Field
 /// Used for forms, phone number entries, searching, and general text profile data inputs.
 class ChateoTextField extends StatefulWidget {
   final TextEditingController? controller;
@@ -38,35 +39,43 @@ class _ChateoTextFieldState extends State<ChateoTextField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return TextField(
       controller: widget.controller,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
       onChanged: widget.onChanged,
-      style: theme.textTheme.bodyMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
+      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
       cursorColor: theme.colorScheme.primary,
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: TextStyle(
           color: theme.brightness == Brightness.light
-              ? const Color(0xFFADB5BD) // AppColors.mutedLight
-              : const Color(0xFFADB5BD), // AppColors.mutedDark
+              ? AppColors
+                    .mutedLight // AppColors.mutedLight
+              : AppColors.activeDark, // AppColors.mutedDark
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
         filled: true,
         fillColor: theme.colorScheme.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
         prefixIcon: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, color: theme.textTheme.bodySmall?.color, size: 20)
+            ? Icon(
+                widget.prefixIcon,
+                color: theme.textTheme.bodySmall?.color,
+                size: 20,
+              )
             : null,
         suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(
-                  _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  _obscureText
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                   color: theme.textTheme.bodySmall?.color,
                   size: 20,
                 ),
@@ -83,13 +92,9 @@ class _ChateoTextFieldState extends State<ChateoTextField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(
-            color: theme.colorScheme.primary,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
         ),
       ),
     );
   }
 }
-

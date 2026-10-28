@@ -1,7 +1,7 @@
 import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
-/// Chateo Messenger Chat Row Cell
+/// Chateo Chat Row Cell
 /// Standard structural component for conversations list, containing status, badges, and titles.
 class ChateoChatCell extends StatelessWidget {
   final String title;
@@ -34,11 +34,7 @@ class ChateoChatCell extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Row(
           children: [
-            ChateoAvatar(
-              imageUrl: avatarUrl,
-              radius: 26,
-              isOnline: isOnline,
-            ),
+            ChateoAvatar(imageUrl: avatarUrl, radius: 26, isOnline: isOnline),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -60,10 +56,16 @@ class ChateoChatCell extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: unreadCount > 0 
-                          ? (isLight ? const Color(0xFF0F1828) : const Color(0xFFF7F7FC)) // Active message state color
+                      color: unreadCount > 0
+                          ? (isLight
+                                ? const Color(0xFF0F1828)
+                                : const Color(
+                                    0xFFF7F7FC,
+                                  )) // Active message state color
                           : const Color(0xFFADB5BD), // Muted state color
-                      fontWeight: unreadCount > 0 ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: unreadCount > 0
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                     ),
                   ),
                 ],
@@ -88,7 +90,7 @@ class ChateoChatCell extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha:0.15),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Text(

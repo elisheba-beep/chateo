@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Conversation Date Splitting Node
 /// In-chat message thread timeline node used to neatly structure history blocks (e.g., "Today", "Yesterday").
