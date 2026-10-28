@@ -20,7 +20,7 @@ class WalkthroughScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              45.heightBox,
+              55.heightBox,
               Center(
                 child: Image(
                   image: AssetImage(
@@ -48,6 +48,7 @@ class WalkthroughScreen extends StatelessWidget {
                   context.pushNamed(RouteNames.phoneNumberInput);
                 },
               ),
+              20.heightBox,
             ],
           ),
         ),

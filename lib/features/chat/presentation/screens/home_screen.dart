@@ -26,17 +26,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text(titles[currentScreenIndex], style: AppTextStyles.title),
+        title: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Text(
+            titles[currentScreenIndex],
+            style: AppTextStyles.title.copyWith(letterSpacing: 1.01),
+          ),
+        ),
         actions: [
           currentScreenIndex == 0
-              ? IconButton(
-                  onPressed: () {},
-                  icon: SvgPicture.asset(
-                    colorFilter: ColorFilter.mode(
-                      theme.colorScheme.inverseSurface,
-                      BlendMode.srcIn,
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: SvgPicture.asset(
+                      colorFilter: ColorFilter.mode(
+                        theme.colorScheme.inverseSurface,
+                        BlendMode.srcIn,
+                      ),
+                      'assets/icons/plus.svg',
                     ),
-                    'assets/icons/plus.svg',
                   ),
                 )
               : currentScreenIndex == 1
@@ -52,14 +61,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 )
               : SizedBox.shrink(),
           currentScreenIndex == 1
-              ? IconButton(
-                  onPressed: () {},
-                  icon: SvgPicture.asset(
-                    colorFilter: ColorFilter.mode(
-                      theme.colorScheme.inverseSurface,
-                      BlendMode.srcIn,
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: SvgPicture.asset(
+                      colorFilter: ColorFilter.mode(
+                        theme.colorScheme.inverseSurface,
+                        BlendMode.srcIn,
+                      ),
+                      'assets/icons/list_check.svg',
                     ),
-                    'assets/icons/list_check.svg',
                   ),
                 )
               : SizedBox.shrink(),
@@ -69,6 +82,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.transparent,
+        fixedColor: Colors.transparent,
+        elevation: 0,
         currentIndex: currentScreenIndex,
         onTap: (index) {
           setState(() {

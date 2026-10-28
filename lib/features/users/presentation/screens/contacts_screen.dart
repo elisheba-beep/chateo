@@ -1,5 +1,6 @@
 import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/router/route_names.dart';
+import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/core/widgets/cells/chateo_chat_cell.dart';
 import 'package:chateo/core/widgets/divider/chateo_divider.dart';
 import 'package:chateo/features/users/presentation/providers/contacts_provider.dart';
@@ -23,6 +24,7 @@ class ContactsScreen extends ConsumerWidget {
         child: Column(
           children: [
             SearchBar(
+              elevation: WidgetStatePropertyAll<double>(0.0),
               onChanged: ref.read(contactSearchProvider.notifier).update,
               padding: const WidgetStatePropertyAll<EdgeInsets>(
                 EdgeInsets.symmetric(horizontal: 6.0, vertical: 0),
@@ -31,12 +33,19 @@ class ContactsScreen extends ConsumerWidget {
                 width: 24,
                 height: 24,
                 colorFilter: ColorFilter.mode(
-                  theme.colorScheme.inverseSurface,
+                  theme.colorScheme.inverseSurface.withValues(alpha: 0.3),
                   BlendMode.srcIn,
                 ),
                 'assets/icons/search.svg',
               ),
               hintText: 'Search',
+              hintStyle: WidgetStatePropertyAll<TextStyle?>(
+                AppTextStyles.bodyTextMedium.copyWith(
+                  color: theme.colorScheme.inverseSurface.withValues(
+                    alpha: 0.3,
+                  ),
+                ),
+              ),
               shape: WidgetStatePropertyAll(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4.0),
@@ -46,36 +55,53 @@ class ContactsScreen extends ConsumerWidget {
             16.heightBox,
             Expanded(
               child: contacts.when(
-                data: (users){
-                  final list = query.isEmpty ? users : users.where((u)=>u.fullName.toLowerCase().contains(query)).toList();
-                  if(list.isEmpty){
-                    return Center(child:Text(query.isEmpty ? 'No contacts yet': 'No results',),);
+                data: (users) {
+                  final list = query.isEmpty
+                      ? users
+                      : users
+                            .where(
+                              (u) => u.fullName.toLowerCase().contains(query),
+                            )
+                            .toList();
+                  if (list.isEmpty) {
+                    return Center(
+                      child: Text(
+                        query.isEmpty ? 'No contacts yet' : 'No results',
+                      ),
+                    );
                   }
                   return ListView.separated(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: list.length,
-                separatorBuilder: (BuildContext context, int index) {
-                  return ChateoDivider();
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  final user = list[index];
-                  return ChateoChatCell(
-                    title: user.fullName,
-                    subtitle: 'last seen recently',
-                    time: '',
-                    initials: user.initials,
-                    avatarBytes: user.imageBytes,
-                    onTap: () {
-                      context.pushNamed(RouteNames.individualChat, extra: user,);
+                    physics: AlwaysScrollableScrollPhysics(),
+                    itemCount: list.length,
+                    separatorBuilder: (BuildContext context, int index) {
+                      return ChateoDivider();
+                    },
+                    itemBuilder: (BuildContext context, int index) {
+                      final user = list[index];
+                      return ChateoChatCell(
+                        title: user.fullName,
+                        subtitle: 'last seen recently',
+                        time: '',
+                        initials: user.initials,
+                        avatarBytes: user.imageBytes,
+                        onTap: () {
+                          context.pushNamed(
+                            RouteNames.individualChat,
+                            extra: user,
+                          );
+                        },
+                      );
                     },
                   );
                 },
-              );
-                },
-               error: (e, _)=> Center(child:Text('Couldn\'t load contacts. \n$e',textAlign: TextAlign.center,),),
-                loading: ()=>const Center(child:  CircularProgressIndicator()),
+                error: (e, _) => Center(
+                  child: Text(
+                    'Couldn\'t load contacts. \n$e',
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              
+                loading: () => const Center(child: CircularProgressIndicator()),
+              ),
             ),
           ],
         ),

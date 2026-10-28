@@ -1,3 +1,4 @@
+import 'package:flutter_svg/svg.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Chat Bar Input Field
@@ -22,20 +23,26 @@ class ChateoChatInputBar extends StatelessWidget {
     final isLight = theme.brightness == Brightness.light;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      color: isLight
-          ? const Color(0xFFFFFFFF)
-          : const Color(0xFF0F1828), // AppColors base background
+      padding: const EdgeInsets.only(top: 10, bottom: 30, left:8, right:8),
+      color:
+      
+      isLight
+                      ? const Color(0xFFF7F7FC)
+                      : const Color(0xFF10141E),
       child: SafeArea(
         child: Row(
           children: [
             IconButton(
-              icon: Icon(
-                Icons.add,
-                color: isLight
-                    ? const Color(0xFFADB5BD)
-                    : const Color(0xFFFFFFFF),
-                size: 24,
+              padding: EdgeInsets.zero,
+
+              icon: SvgPicture.asset(
+                'assets/icons/plus.svg',
+                colorFilter: ColorFilter.mode(
+                  isLight ? const Color(0xFFADB5BD) : const Color(0xFFFFFFFF),
+                  BlendMode.srcIn,
+                ),
+                width: 24,
+                height: 24,
               ),
               onPressed: onAttachPressed,
             ),
@@ -56,9 +63,9 @@ class ChateoChatInputBar extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                   ),
                   filled: true,
-                  fillColor: isLight
-                      ? const Color(0xFFF7F7FC)
-                      : const Color(0xFF10141E), // AppColors.offWhite
+                  fillColor:  isLight
+          ? const Color(0xFFFFFFFF)
+          : const Color(0xFF0F1828), 
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 10,
@@ -80,10 +87,15 @@ class ChateoChatInputBar extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             IconButton(
-              icon: Icon(
-                Icons.send_rounded,
-                color: theme.colorScheme.primary,
-                size: 24,
+              padding: EdgeInsets.zero,
+              icon: SvgPicture.asset(
+                'assets/icons/send-alt-filled.svg',
+                colorFilter: ColorFilter.mode(
+                  theme.colorScheme.primary,
+                  BlendMode.srcIn,
+                ),
+                width: 24,
+                height: 24,
               ),
               onPressed: onSendPressed,
             ),

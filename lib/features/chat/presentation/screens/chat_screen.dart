@@ -44,6 +44,8 @@ class ChatScreen extends ConsumerWidget {
             ChateoDivider(),
             16.heightBox,
             SearchBar(
+              elevation: WidgetStatePropertyAll<double>(0.0),
+
               padding: const WidgetStatePropertyAll<EdgeInsets>(
                 EdgeInsets.symmetric(horizontal: 6.0, vertical: 0),
               ),
@@ -51,12 +53,20 @@ class ChatScreen extends ConsumerWidget {
                 width: 24,
                 height: 24,
                 colorFilter: ColorFilter.mode(
-                  theme.colorScheme.inverseSurface,
+                  theme.colorScheme.inverseSurface.withValues(alpha: 0.3),
+
                   BlendMode.srcIn,
                 ),
                 'assets/icons/search.svg',
               ),
-              hintText: 'Placeholder',
+              hintText: 'Search',
+              hintStyle: WidgetStatePropertyAll<TextStyle?>(
+                AppTextStyles.bodyTextMedium.copyWith(
+                  color: theme.colorScheme.inverseSurface.withValues(
+                    alpha: 0.3,
+                  ),
+                ),
+              ),
               shape: WidgetStatePropertyAll(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4.0),
@@ -77,8 +87,8 @@ class ChatScreen extends ConsumerWidget {
                     subtitle: 'last message in conversation',
                     time: 'Today',
                     unreadCount: 4,
-                    onTap: (){
-                      context.pushNamed(RouteNames.individualChat,);
+                    onTap: () {
+                      context.pushNamed(RouteNames.individualChat);
                     },
                   );
                 },

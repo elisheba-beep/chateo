@@ -1,4 +1,3 @@
-import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/core/widgets/input/chateo_chat_input_bar.dart';
 import 'package:chateo/features/users/data/models/user_profile.dart';
@@ -50,27 +49,29 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
               'assets/icons/search.svg',
             ),
           ),
-          8.widthBox,
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(
-                theme.colorScheme.inverseSurface,
-                BlendMode.srcIn,
+          Padding(
+            padding: const EdgeInsets.only(right:8.0),
+            child: IconButton(
+              onPressed: () {},
+              icon: SvgPicture.asset(
+                width: 24,
+                height: 24,
+                colorFilter: ColorFilter.mode(
+                  theme.colorScheme.inverseSurface,
+                  BlendMode.srcIn,
+                ),
+                'assets/icons/hamburger.svg',
               ),
-              'assets/icons/hamburger.svg',
             ),
           ),
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              Expanded(
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
                 child: ListView.builder(
                   itemCount: 3,
                   itemBuilder: (BuildContext context, int index) {
@@ -78,9 +79,9 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
                   },
                 ),
               ),
-              ChateoChatInputBar(),
-            ],
-          ),
+            ),
+            ChateoChatInputBar(),
+          ],
         ),
       ),
     );

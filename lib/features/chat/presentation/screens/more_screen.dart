@@ -1,8 +1,9 @@
 import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/providers/firebase_providers.dart';
-import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
+import 'package:chateo/core/widgets/divider/chateo_divider.dart';
 import 'package:chateo/features/chat/data/mock_Settings.dart';
+import 'package:chateo/features/chat/presentation/widgets/appearance_dialog.dart';
 import 'package:chateo/features/chat/presentation/widgets/settings_tile.dart';
 import 'package:chateo/features/users/presentation/providers/current_user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,31 +25,45 @@ class MoreScreen extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             sliver: SliverToBoxAdapter(
               child: profile.when(
-                data: (user)=>ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: ChateoAvatar(
-                  imageBytes: user?.imageBytes,
-                  initials: user?.initials,
-                  radius: 24,
-                ),
-                title: Text(user?.fullName ?? '', style: AppTextStyles.bodyTextMedium),
-                subtitle: Text(
-                 phone ?? '',
-                  style: AppTextStyles.bodyTextSmall,
-                ),
-                trailing: SvgPicture.asset(
-                  width: 24,
-                  height: 24,
-                  'assets/icons/chevron_right.svg',
-                  colorFilter: ColorFilter.mode(
-                    theme.colorScheme.inverseSurface,
-                    BlendMode.srcIn,
+                data: (user) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: ChateoAvatar(
+                    imageBytes: user?.imageBytes,
+                    initials: user?.initials,
+                    radius: 24,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      user?.fullName ?? '',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  subtitle: Text(
+                    phone ?? '',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFFADB5BD),
+                    ),
+                  ),
+                  trailing: SvgPicture.asset(
+                    width: 24,
+                    height: 24,
+                    'assets/icons/chevron_right.svg',
+                    colorFilter: ColorFilter.mode(
+                      theme.colorScheme.inverseSurface,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
+                error: (_, _) => const Text('Couldn\'t load your profile'),
+                loading: () => const SizedBox(
+                  height: 56,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
               ),
-               error: (_,_)=>const Text('Couldn\'t load your profile',), 
-               loading:()=> const SizedBox(height:56, child:Center(child:CircularProgressIndicator(),),),
-               ),
             ),
           ),
           SliverPadding(
@@ -79,12 +94,14 @@ class MoreScreen extends ConsumerWidget {
                 return SettingsTile(
                   title: setting.title,
                   iconPath: setting.iconPath,
-                  onTap: setting.onTap,
+                  onTap: setting.title == 'Appearance'
+                      ? () => showAppearanceDialog(context, ref)
+                      : setting.onTap,
                 );
               }, childCount: chateoSettings.length),
             ),
           ),
-          SliverToBoxAdapter(child: 16.heightBox),
+           SliverToBoxAdapter(child: ChateoDivider()),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             sliver: SliverList(

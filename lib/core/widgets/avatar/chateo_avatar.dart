@@ -19,7 +19,7 @@ class ChateoAvatar extends StatelessWidget {
     this.imageUrl,
     this.base64Image,
     this.initials,
-    this.radius = 48,
+    this.radius = 50,
     this.isOnline = false,
     this.onTap,
     this.imageBytes,

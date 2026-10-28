@@ -72,6 +72,7 @@ class _InputPhoneNumberScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    40.heightBox,
                     Text(
                       'Enter Your Phone Number',
                       style: AppTextStyles.heading2,
@@ -109,6 +110,7 @@ class _InputPhoneNumberScreenState
                                 .read(phoneAuthProvider.notifier)
                                 .sendCode(country, _phone.text),
                     ),
+                    20.heightBox,
                   ],
                 ),
               ),

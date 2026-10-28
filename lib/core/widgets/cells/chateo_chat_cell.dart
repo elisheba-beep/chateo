@@ -30,12 +30,11 @@ class ChateoChatCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
 
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12.0),
         child: Row(
           children: [
             ChateoAvatar(
@@ -66,16 +65,10 @@ class ChateoChatCell extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: unreadCount > 0
-                          ? (isLight
-                                ? const Color(0xFF0F1828)
-                                : const Color(
-                                    0xFFF7F7FC,
-                                  )) // Active message state color
-                          : const Color(0xFFADB5BD), // Muted state color
+                      color:  const Color(0xFFADB5BD), // Muted state color
                       fontWeight: unreadCount > 0
-                          ? FontWeight.w600
-                          : FontWeight.w400,
+                          ? FontWeight.w400
+                          : FontWeight.w300,
                     ),
                   ),
                 ],
@@ -98,7 +91,7 @@ class ChateoChatCell extends StatelessWidget {
                   opacity: unreadCount > 0 ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
                   child: Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,

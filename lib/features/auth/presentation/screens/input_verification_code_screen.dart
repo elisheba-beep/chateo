@@ -80,6 +80,7 @@ class _InputPhoneNumberScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    40.heightBox,
                     Text('Enter Code', style: AppTextStyles.heading2),
                     8.heightBox,
                     Text(
@@ -131,6 +132,7 @@ class _InputPhoneNumberScreenState
                                 ),
                       variant: ChateoButtonVariant.secondary,
                     ),
+                    20.heightBox,
                   ],
                 ),
               ),

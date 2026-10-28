@@ -1,3 +1,4 @@
+import 'package:chateo/core/providers/theme_mode_provider.dart';
 import 'package:chateo/core/router/router_provider.dart';
 import 'package:chateo/core/theme/app_theme.dart';
 import 'package:material_ui/material_ui.dart';
@@ -18,14 +19,14 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeModeControllerProvider);
 
     return MaterialApp.router(
       title: 'chateo',
       debugShowCheckedModeBanner: false,
-
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

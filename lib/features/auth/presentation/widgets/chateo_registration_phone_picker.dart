@@ -83,35 +83,44 @@ class _CountryPickerSheetState extends State<CountryPickerSheet> {
           (c) => c.name.toLowerCase().contains(q) || c.dialCode.contains(q),
         )
         .toList();
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: ChateoTextField(
-            hintText: 'Search country or code',
-            prefixIcon: Icons.search,
-            onChanged: (v) => setState(() => _q = v),
-          ),
+
+        final inset = MediaQuery.viewInsetsOf(context).bottom; // keyboard height
+    final height = MediaQuery.sizeOf(context).height * 0.6;
+    return Padding(
+      padding:  EdgeInsets.only(bottom:inset,),
+      child: SizedBox(
+        height:height,
+        child: Column(
+          children: [
+            Padding(
+            padding: const EdgeInsets.all(16),
+              child: ChateoTextField(
+                hintText: 'Search country or code',
+                prefixIcon: Icons.search,
+                onChanged: (v) => setState(() => _q = v),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: list.length,
+                itemBuilder: (_, i) {
+                  final c = list[i];
+                  return ListTile(
+                    leading: Text(
+                      c.flagEmoji,
+                      style: const TextStyle(fontSize: 22),
+                    ),
+                    title: Text(c.name),
+                    trailing: Text(c.dialCode),
+                    selected: c == widget.selected,
+                    onTap: () => Navigator.pop(context, c),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: list.length,
-            itemBuilder: (_, i) {
-              final c = list[i];
-              return ListTile(
-                leading: Text(
-                  c.flagEmoji,
-                  style: const TextStyle(fontSize: 22),
-                ),
-                title: Text(c.name),
-                trailing: Text(c.dialCode),
-                selected: c == widget.selected,
-                onTap: () => Navigator.pop(context, c),
-              );
-            },
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

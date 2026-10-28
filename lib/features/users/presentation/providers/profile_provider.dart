@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:chateo/features/users/data/models/user_profile.dart';
 import 'package:chateo/features/users/data/repositories/profile_repository.dart';
@@ -17,14 +17,11 @@ class ProfileRegistration extends _$ProfileRegistration {
   Future<bool> registerUser({
     required String firstName,
     String? lastName,
-    File? imageFile,
+    Uint8List? imageBytes,
   }) async {
     state = const AsyncValue.loading();
     try {
-      String? base64String;
-      if (imageFile != null) {
-        base64String = base64Encode(await imageFile.readAsBytes());
-      }
+     final base64String = imageBytes == null ? null : base64Encode(imageBytes);
 
       await _repo.saveProfile(
         UserProfile(

@@ -42,7 +42,7 @@ final class ProfileRegistrationProvider
 }
 
 String _$profileRegistrationHash() =>
-    r'cc51776b8daabc59c23627f190314292dec2cf7e';
+    r'2d8f4dd379a68a7ec39b0c1bd28b84d551f86291';
 
 abstract class _$ProfileRegistration extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

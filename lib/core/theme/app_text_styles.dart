@@ -19,6 +19,7 @@ class AppTextStyles {
     fontSize: 24,
     fontWeight: FontWeight.w700,
     height: 1.25,
+    letterSpacing: 1.2,
   );
 
   // Title / Subheading (Appbar / Active Lists)

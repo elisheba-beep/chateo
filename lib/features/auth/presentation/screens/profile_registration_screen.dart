@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/router/route_names.dart';
@@ -25,7 +24,7 @@ class _ProfileRegistrationScreenState
     extends ConsumerState<ProfileRegistrationScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  File? _selectedImage;
+  Uint8List? _imageBytes;
   String _initials = '';
 
   @override
@@ -48,19 +47,18 @@ class _ProfileRegistrationScreenState
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
+    final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxHeight: 200,
       maxWidth: 200,
       imageQuality: 85,
     );
+    if (picked == null) return;
 
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
+    final bytes = await picked.readAsBytes();
+
+    if (!mounted) return;
+    setState(() => _imageBytes = bytes);
   }
 
   @override
@@ -81,11 +79,6 @@ class _ProfileRegistrationScreenState
       }
     });
 
-    String? getBase64Preview() {
-      if (_selectedImage == null) return null;
-      return base64Encode(_selectedImage!.readAsBytesSync());
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -97,11 +90,12 @@ class _ProfileRegistrationScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              40.heightBox,
               Center(
                 child: ChateoAvatar(
                   radius: 50,
                   initials: _initials,
-                  base64Image: getBase64Preview(),
+                  imageBytes: _imageBytes,
                   onTap: _pickImage,
                 ),
               ),
@@ -135,13 +129,14 @@ class _ProfileRegistrationScreenState
                             .registerUser(
                               firstName: _firstNameController.text.trim(),
                               lastName: _lastNameController.text.trim(),
-                              imageFile: _selectedImage,
+                              imageBytes: _imageBytes,
                             );
                         if (success && context.mounted) {
-                        context.goNamed(RouteNames.home); 
+                          context.goNamed(RouteNames.home);
                         }
                       },
               ),
+              20.heightBox,
             ],
           ),
         ),
