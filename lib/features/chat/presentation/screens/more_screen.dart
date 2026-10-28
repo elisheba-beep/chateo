@@ -1,8 +1,10 @@
 import 'package:chateo/core/constants/sized_boxes.dart';
+import 'package:chateo/core/providers/firebase_providers.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:chateo/features/chat/data/mock_Settings.dart';
 import 'package:chateo/features/chat/presentation/widgets/settings_tile.dart';
+import 'package:chateo/features/users/presentation/providers/current_user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:material_ui/material_ui.dart';
@@ -13,18 +15,25 @@ class MoreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final profile = ref.watch(currentUserProvider);
+    final phone = ref.watch(firebaseAuthProvider).currentUser?.phoneNumber;
     return SafeArea(
       child: CustomScrollView(
         slivers: [
           SliverPadding(
             padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             sliver: SliverToBoxAdapter(
-              child: ListTile(
+              child: profile.when(
+                data: (user)=>ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: ChateoAvatar(),
-                title: Text('User name', style: AppTextStyles.bodyTextMedium),
+                leading: ChateoAvatar(
+                  imageBytes: user?.imageBytes,
+                  initials: user?.initials,
+                  radius: 24,
+                ),
+                title: Text(user?.fullName ?? '', style: AppTextStyles.bodyTextMedium),
                 subtitle: Text(
-                  'user phone number',
+                 phone ?? '',
                   style: AppTextStyles.bodyTextSmall,
                 ),
                 trailing: SvgPicture.asset(
@@ -37,6 +46,9 @@ class MoreScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+               error: (_,_)=>const Text('Couldn\'t load your profile',), 
+               loading:()=> const SizedBox(height:56, child:Center(child:CircularProgressIndicator(),),),
+               ),
             ),
           ),
           SliverPadding(

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:chateo/core/theme/app_colors.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -10,6 +12,7 @@ class ChateoAvatar extends StatelessWidget {
   final double radius;
   final bool isOnline;
   final VoidCallback? onTap;
+  final Uint8List? imageBytes;
 
   const ChateoAvatar({
     super.key,
@@ -19,11 +22,13 @@ class ChateoAvatar extends StatelessWidget {
     this.radius = 48,
     this.isOnline = false,
     this.onTap,
+    this.imageBytes,
   });
 
   @override
   Widget build(BuildContext context) {
     ImageProvider? getAvatarImage() {
+      if(imageBytes != null) return MemoryImage(imageBytes!);
       if (imageUrl != null && imageUrl!.isNotEmpty) {
         return NetworkImage(imageUrl!);
       }
@@ -53,16 +58,18 @@ class ChateoAvatar extends StatelessWidget {
               ),
               child: avatarImage == null
                   ? (initials != null && initials!.isNotEmpty)
-                        ? Text(
-                            initials!.toUpperCase(),
-                            style: TextStyle(
-                              fontSize: radius * 0.7,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(
-                                0xFF002DE3,
-                              ), // Primary Brand Color
+                        ? Center(
+                          child: Text(
+                              initials!.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: radius,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(
+                                  0xFF002DE3,
+                                ), // Primary Brand Color
+                              ),
                             ),
-                          )
+                        )
                         : Icon(
                             Icons.person_outline_rounded,
                             size: radius * 0.9,

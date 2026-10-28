@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 class UserProfile {
   final String uid;
   final String firstName;
@@ -10,6 +13,26 @@ class UserProfile {
     this.lastName,
     this.base64Image,
   });
+String get fullName => '$firstName ${lastName ?? ''}'.trim();
+
+String get initials {
+  final f = firstName.trim();
+  final l = (lastName ?? '').trim();
+  return '${f.isNotEmpty ? f[0] : ''}${l.isNotEmpty ? l[0] : ''}';
+
+
+}
+
+late final Uint8List? imageBytes = _decode(base64Image);
+
+static Uint8List? _decode(String? s){
+  if(s==null || s.isEmpty) return null;
+  try{
+    return base64Decode(s);
+  }on FormatException {
+    return null;
+  }
+}
 
   Map<String, dynamic> toMap() {
     return {
@@ -21,12 +44,12 @@ class UserProfile {
     };
   }
 
-  factory UserProfile.fromMap(Map<String, dynamic> map) {
+  factory UserProfile.fromMap(Map<String, dynamic> map, {String? id}) {
     return UserProfile(
-      uid: map['uid'] ?? '',
-      firstName: map['firstName'] ?? '',
-      lastName: map['lastName'],
-      base64Image: map['base64Image'],
+      uid: id ?? (map['uid'] as String? ?? ''),
+      firstName: map['firstName'] as String? ?? '',
+      lastName: map['lastName'] as String?,
+      base64Image: map['base64Image'] as String?,
     );
   }
 }

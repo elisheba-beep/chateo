@@ -9,6 +9,7 @@ import 'package:chateo/features/auth/presentation/screens/profile_registration_s
 import 'package:chateo/features/chat/presentation/screens/home_screen.dart';
 import 'package:chateo/features/chat/presentation/screens/individual_chat_screen.dart';
 import 'package:chateo/features/onboarding/presentation/screens/walkthrough_screen.dart';
+import 'package:chateo/features/users/data/models/user_profile.dart';
 import 'package:chateo/features/users/data/repositories/profile_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -127,7 +128,13 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: '/individualChat',
         name: RouteNames.individualChat,
-        builder: (context, state) => const IndividualChatScreen(),
+        builder: (context, state) {
+          final user = state.extra as UserProfile?;
+          if (user == null) {
+            return const PageNotFound(errorMessage: 'No contact selected');
+          }
+          return IndividualChatScreen(user: user);
+        },
       ),
     ],
     errorBuilder: (context, state) =>

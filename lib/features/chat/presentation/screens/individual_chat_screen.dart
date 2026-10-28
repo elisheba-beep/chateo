@@ -1,13 +1,15 @@
 import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/core/widgets/input/chateo_chat_input_bar.dart';
+import 'package:chateo/features/users/data/models/user_profile.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class IndividualChatScreen extends ConsumerStatefulWidget {
-  const IndividualChatScreen({super.key});
+  const IndividualChatScreen({required this.user, super.key});
+  final UserProfile user;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -21,7 +23,7 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text('user name', style: AppTextStyles.title),
+        title: Text(widget.user.fullName, style: AppTextStyles.title),
         leading: IconButton(
           onPressed: () {
             context.pop();

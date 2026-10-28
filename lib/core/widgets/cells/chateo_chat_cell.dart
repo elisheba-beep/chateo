@@ -1,6 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:material_ui/material_ui.dart';
-
 
 class ChateoChatCell extends StatelessWidget {
   final String title;
@@ -10,6 +11,8 @@ class ChateoChatCell extends StatelessWidget {
   final String? avatarUrl;
   final bool isOnline;
   final VoidCallback? onTap;
+  final Uint8List? avatarBytes;
+  final String? initials;
 
   const ChateoChatCell({
     super.key,
@@ -20,6 +23,8 @@ class ChateoChatCell extends StatelessWidget {
     this.avatarUrl,
     this.isOnline = false,
     this.onTap,
+    this.avatarBytes,
+    this.initials,
   });
 
   @override
@@ -33,7 +38,13 @@ class ChateoChatCell extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Row(
           children: [
-            ChateoAvatar(imageUrl: avatarUrl, radius: 26, isOnline: isOnline),
+            ChateoAvatar(
+              imageUrl: avatarUrl,
+              radius: 26,
+              isOnline: isOnline,
+              imageBytes: avatarBytes,
+              initials: initials,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
