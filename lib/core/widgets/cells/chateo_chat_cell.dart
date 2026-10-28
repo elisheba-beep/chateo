@@ -1,8 +1,7 @@
 import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Chateo Chat Row Cell
-/// Standard structural component for conversations list, containing status, badges, and titles.
+
 class ChateoChatCell extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -55,7 +54,7 @@ class ChateoChatCell extends StatelessWidget {
                     subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: unreadCount > 0
                           ? (isLight
                                 ? const Color(0xFF0F1828)
@@ -96,7 +95,7 @@ class ChateoChatCell extends StatelessWidget {
                     child: Text(
                       '$unreadCount',
                       style: TextStyle(
-                        color: theme.colorScheme.primary,
+                        color: theme.colorScheme.outline,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),

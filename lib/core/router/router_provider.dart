@@ -7,6 +7,7 @@ import 'package:chateo/features/auth/presentation/screens/input_phone_number_scr
 import 'package:chateo/features/auth/presentation/screens/input_verification_code_screen.dart';
 import 'package:chateo/features/auth/presentation/screens/profile_registration_screen.dart';
 import 'package:chateo/features/chat/presentation/screens/home_screen.dart';
+import 'package:chateo/features/chat/presentation/screens/individual_chat_screen.dart';
 import 'package:chateo/features/onboarding/presentation/screens/walkthrough_screen.dart';
 import 'package:chateo/features/users/data/repositories/profile_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -72,7 +73,9 @@ GoRouter router(Ref ref) {
       };
 
       if (!signedIn) {
-        if (loc == '/profileRegistration' || loc == '/home') {
+        if (loc == '/profileRegistration' ||
+            loc == '/home' ||
+            loc == '/individualChat') {
           return '/phoneNumberInput';
         }
         return null;
@@ -120,6 +123,11 @@ GoRouter router(Ref ref) {
         path: '/home',
         name: RouteNames.home,
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/individualChat',
+        name: RouteNames.individualChat,
+        builder: (context, state) => const IndividualChatScreen(),
       ),
     ],
     errorBuilder: (context, state) =>

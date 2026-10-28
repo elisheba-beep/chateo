@@ -1,3 +1,4 @@
+import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/features/chat/presentation/screens/chat_screen.dart';
 import 'package:chateo/features/chat/presentation/screens/more_screen.dart';
@@ -24,12 +25,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isLight = theme.brightness == Brightness.light;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Text(titles[currentScreenIndex], style: AppTextStyles.title),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset('assets/icons/plus.svg'),
-          ),
+          currentScreenIndex == 0
+              ? IconButton(
+                  onPressed: () {},
+                  icon: SvgPicture.asset(
+                    colorFilter: ColorFilter.mode(
+                      theme.colorScheme.inverseSurface,
+                      BlendMode.srcIn,
+                    ),
+                    'assets/icons/plus.svg',
+                  ),
+                )
+              : currentScreenIndex == 1
+              ? IconButton(
+                  onPressed: () {},
+                  icon: SvgPicture.asset(
+                    colorFilter: ColorFilter.mode(
+                      theme.colorScheme.inverseSurface,
+                      BlendMode.srcIn,
+                    ),
+                    'assets/icons/message_plus_alt.svg',
+                  ),
+                )
+              : SizedBox.shrink(),
+          currentScreenIndex == 1
+              ? IconButton(
+                  onPressed: () {},
+                  icon: SvgPicture.asset(
+                    colorFilter: ColorFilter.mode(
+                      theme.colorScheme.inverseSurface,
+                      BlendMode.srcIn,
+                    ),
+                    'assets/icons/list_check.svg',
+                  ),
+                )
+              : SizedBox.shrink(),
         ],
       ),
       body: screens[currentScreenIndex],
@@ -55,6 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text('Contacts'),
+                4.heightBox,
                 SvgPicture.asset(
                   width: 4,
                   height: 4,
@@ -78,6 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text('Chats'),
+                4.heightBox,
                 SvgPicture.asset(
                   width: 4,
                   height: 4,
@@ -101,6 +136,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text('More'),
+                4.heightBox,
                 SvgPicture.asset(
                   width: 4,
                   height: 4,

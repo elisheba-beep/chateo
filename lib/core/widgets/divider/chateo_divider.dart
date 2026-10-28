@@ -1,3 +1,4 @@
+import 'package:chateo/core/theme/app_colors.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Standard Full-Width Divider
@@ -16,7 +17,7 @@ class ChateoDivider extends StatelessWidget {
     return Divider(
       height: height,
       thickness: thickness,
-      color: isLight ? const Color(0xFFEDEDED) : const Color(0xFF152033),
+      color: isLight ? AppColors.lineLight : AppColors.lineDark,
     );
   }
 }

@@ -23,9 +23,6 @@ class ChateoAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
-
     ImageProvider? getAvatarImage() {
       if (imageUrl != null && imageUrl!.isNotEmpty) {
         return NetworkImage(imageUrl!);
@@ -42,47 +39,50 @@ class ChateoAvatar extends StatelessWidget {
       onTap: onTap,
       child: Stack(
         children: [
-          CircleAvatar(
-            radius: radius,
-            backgroundColor: isLight
-                ? AppColors.offWhiteLight
-                : AppColors.offWhiteDark,
-            backgroundImage: avatarImage,
-            child: avatarImage == null
-                ? (initials != null && initials!.isNotEmpty)
-                      ? Text(
-                          initials!.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: radius * 0.7,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(
-                              0xFF002DE3,
-                            ), // Primary Brand Color
-                          ),
-                        )
-                      : Icon(
-                          Icons.person_outline_rounded,
-                          size: radius * 0.9,
-                          color: const Color(0xFFADB5BD),
-                        )
-                : null,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16.0),
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: isOnline ? Colors.transparent : AppColors.primaryBrand,
+                  width: isOnline ? 0 : 2,
+                ),
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: avatarImage == null
+                  ? (initials != null && initials!.isNotEmpty)
+                        ? Text(
+                            initials!.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: radius * 0.7,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(
+                                0xFF002DE3,
+                              ), // Primary Brand Color
+                            ),
+                          )
+                        : Icon(
+                            Icons.person_outline_rounded,
+                            size: radius * 0.9,
+                            color: const Color(0xFFADB5BD),
+                          )
+                  : null,
+            ),
           ),
           if (isOnline)
             Positioned(
-              right: 2,
-              bottom: 2,
+              right: 0,
+              top: 0,
               child: Container(
-                width: radius * 0.45,
-                height: radius * 0.45,
+                width: 12,
+                height: 12,
                 decoration: BoxDecoration(
                   color: const Color(0xFF2CC069), // AppColors.success
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isLight
-                        ? const Color(0xFFFFFFFF)
-                        : const Color(
-                            0xFF0F1828,
-                          ), // Matches Scaffold Background
+                    color: AppColors.activeDark, // Matches Scaffold Background
                     width: 2,
                   ),
                 ),

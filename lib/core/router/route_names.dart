@@ -4,5 +4,6 @@ class RouteNames{
   static const verificationCodeInput = 'verificationCodeInput';
   static const profileRegistration = 'profileRegistration';
   static const home = 'home';
+  static const individualChat = 'individualChat';
   
 }
