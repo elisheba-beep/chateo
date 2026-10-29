@@ -20,6 +20,7 @@ class ChatScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final chatPreviews = ref.watch(chatPreviewsProvider);
+    final query = ref.watch(chatSearchProvider).trim().toLowerCase();
 
     final presences = ref.watch(allPresenceProvider).value ?? const {};
     final now = ref.watch(clockProvider).value ?? DateTime.now();
@@ -55,6 +56,7 @@ class ChatScreen extends ConsumerWidget {
             16.heightBox,
             SearchBar(
               elevation: WidgetStatePropertyAll<double>(0.0),
+              onChanged: ref.read(chatSearchProvider.notifier).update,
 
               padding: const WidgetStatePropertyAll<EdgeInsets>(
                 EdgeInsets.symmetric(horizontal: 6.0, vertical: 0),
@@ -94,23 +96,35 @@ class ChatScreen extends ConsumerWidget {
                   ),
                 ),
                 data: (items) {
-                  if (items.isEmpty) {
-                    return const Center(
+                  final list = query.isEmpty
+                      ? items
+                      : items
+                            .where(
+                              (u) =>
+                                  u.user.fullName.toLowerCase().contains(query),
+                            )
+                            .toList();
+                  if (list.isEmpty) {
+                    return Center(
                       child: Text(
-                        textAlign:TextAlign.center,
-                        'No chats yet.\nStart a new one from contacts',
+                        textAlign: TextAlign.center,
+
+                        query.isEmpty
+                            ? 'No chats yet.\nStart a new one from contacts'
+                            : 'No results',
                       ),
                     );
                   }
+
                   final me = ref.read(chatRepositoryProvider).currentUid;
                   return ListView.separated(
                     physics: AlwaysScrollableScrollPhysics(),
-                    itemCount: items.length,
+                    itemCount: list.length,
                     separatorBuilder: (BuildContext context, int index) {
                       return ChateoDivider();
                     },
                     itemBuilder: (BuildContext context, int index) {
-                      final person = items[index];
+                      final person = list[index];
                       final room = person.room;
                       final last = room.lastMessage ?? '';
                       return ChateoChatCell(

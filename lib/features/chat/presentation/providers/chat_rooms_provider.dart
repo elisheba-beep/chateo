@@ -33,3 +33,12 @@ Stream<List<ChatPreview>> chatPreviews(Ref ref) async*{
     ];
   }
 }
+
+  @riverpod
+  class ChatSearch extends _$ChatSearch {
+    @override
+    String build() {
+     return '' ;
+    }
+    void update(String value)=>state=value;
+  }

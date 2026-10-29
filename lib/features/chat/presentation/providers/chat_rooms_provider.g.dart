@@ -88,3 +88,54 @@ final class ChatPreviewsProvider
 }
 
 String _$chatPreviewsHash() => r'fbd19a463624eaf5335cda8d2e9728c8797394af';
+
+@ProviderFor(ChatSearch)
+final chatSearchProvider = ChatSearchProvider._();
+
+final class ChatSearchProvider extends $NotifierProvider<ChatSearch, String> {
+  ChatSearchProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatSearchProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatSearchHash();
+
+  @$internal
+  @override
+  ChatSearch create() => ChatSearch();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String>(value),
+    );
+  }
+}
+
+String _$chatSearchHash() => r'd2787daf0b5eef00c8b5c6eae95a23be26906281';
+
+abstract class _$ChatSearch extends $Notifier<String> {
+  String build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<String, String>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String, String>,
+              String,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
