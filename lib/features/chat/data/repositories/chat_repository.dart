@@ -80,6 +80,7 @@ class ChatRepository {
     required String chatId,
     required String otherUid,
     required String text,
+    ReplyRef? replyTo,
   }) async {
     final me = currentUid;
     final trimmed = text.trim();
@@ -93,9 +94,11 @@ class ChatRepository {
       'senderId': me,
       'text': trimmed,
       'createdAt': FieldValue.serverTimestamp(),
+      if (replyTo != null) 'replyTo': replyTo.toMap(),
     });
     batch.update(roomRef, {
       'lastMessage': trimmed.length > 100 ? trimmed.substring(0, 100) : trimmed,
+      'lastMessageKind': 'text',
       'lastMessageSenderId': me,
       'lastMessageAt': FieldValue.serverTimestamp(),
       'unreadCounts.$otherUid': FieldValue.increment(1),
@@ -122,11 +125,11 @@ class ChatRepository {
 
   Future<void> setReaction({
     required String chatId,
-    required String messageId,
+    required ChatMessage message,
     String? emoji,
   }) {
     final me = currentUid;
-    return _rooms.doc(chatId).collection('messages').doc(messageId).update({
+    return _rooms.doc(chatId).collection('messages').doc(message.id).update({
       'reactions.$me': emoji ?? FieldValue.delete(),
     });
   }

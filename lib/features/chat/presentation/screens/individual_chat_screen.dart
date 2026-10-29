@@ -8,6 +8,7 @@ import 'package:chateo/features/chat/data/models/chat_message.dart';
 import 'package:chateo/features/chat/data/models/chat_room.dart';
 import 'package:chateo/features/chat/data/repositories/chat_repository.dart';
 import 'package:chateo/features/chat/presentation/providers/message_provider.dart';
+import 'package:chateo/features/chat/presentation/widgets/reply_preview.dart';
 import 'package:chateo/features/users/data/models/presence.dart';
 import 'package:chateo/features/users/data/models/user_profile.dart';
 import 'package:chateo/features/users/presentation/providers/presence_provider.dart';
@@ -31,6 +32,7 @@ class IndividualChatScreen extends ConsumerStatefulWidget {
 }
 
 class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
+  ChatMessage? _replyingTo;
   final _controller = TextEditingController();
   late final String _me;
   static const _emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
@@ -58,6 +60,8 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     _controller.clear();
+    final reply = _replyingTo;
+    setState(() => _replyingTo = null);
 
     try {
       await ref
@@ -66,6 +70,13 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
             chatId: widget.chatId,
             otherUid: widget.user.uid,
             text: text,
+            replyTo: reply == null
+                ? null
+                : ReplyRef(
+                    messageId: reply.id,
+                    senderId: reply.senderId,
+                    text: reply.text,
+                  ),
           );
     } catch (e) {
       if (!mounted) return;
@@ -113,9 +124,13 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
         .read(chatRepositoryProvider)
         .setReaction(
           chatId: widget.chatId,
-          messageId: m.id,
+          message: m,
           emoji: picked == mine ? null : picked,
         );
+  }
+
+  void reply(ChatMessage m) {
+    setState(() => _replyingTo = m);
   }
 
   @override
@@ -234,7 +249,12 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
                                     )
                                   : null,
                               reactions: message.reactions,
+                              reply: message.replyTo,
+                              replyAuthor: message.replyTo?.senderId == _me
+                                  ? 'You'
+                                  : widget.user.firstName,
                               onLongPress: () => _react(message),
+                              onSwipeToReply: () => reply(message),
                             ),
                           ),
                         ],
@@ -251,7 +271,19 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
                 loading: () => const Center(child: CircularProgressIndicator()),
               ),
             ),
-            ChateoChatInputBar(controller: _controller, onSendPressed: _send),
+            ChateoChatInputBar(
+              controller: _controller,
+              onSendPressed: _send,
+              header: _replyingTo == null
+                  ? null
+                  : ReplyPreview(
+                      author: _replyingTo!.senderId == _me
+                          ? 'You'
+                          : widget.user.firstName,
+                      text: _replyingTo!.text,
+                      onClose: () => setState(() => _replyingTo = null),
+                    ),
+            ),
           ],
         ),
       ),
