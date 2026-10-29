@@ -18,7 +18,7 @@ class ChateoMessageBubble extends StatelessWidget {
   final String text;
   final String time;
   final bool isMine;
-  final MessageStatus? status; 
+  final MessageStatus? status;
   final Map<String, String> reactions;
   final VoidCallback? onLongPress;
 
@@ -28,7 +28,7 @@ class ChateoMessageBubble extends StatelessWidget {
 
     final background = isMine
         ? (isLight ? AppColors.primaryBrand : AppColors.primaryDark)
-        : (isLight ? AppColors.whiteLight : AppColors.backgroundDark);
+        : (isLight ? AppColors.offWhiteLight : AppColors.offWhiteDark);
     final textColor = isMine
         ? Colors.white
         : (isLight ? AppColors.activeLight : AppColors.activeDark);
@@ -46,8 +46,9 @@ class ChateoMessageBubble extends StatelessWidget {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment:
-              isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMine
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             GestureDetector(
               onLongPress: onLongPress,
@@ -65,8 +66,9 @@ class ChateoMessageBubble extends StatelessWidget {
                   children: [
                     Text(
                       text,
-                      style: AppTextStyles.bodyTextMedium
-                          .copyWith(color: textColor),
+                      style: AppTextStyles.bodyTextMedium.copyWith(
+                        color: textColor,
+                      ),
                     ),
                     6.heightBox,
                     Row(
@@ -103,12 +105,15 @@ class _Tick extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (status) {
-        MessageStatus.sending => Icon(Icons.schedule, size: 12, color: color),
-        MessageStatus.sent => Icon(Icons.done, size: 14, color: color),
-        MessageStatus.delivered => Icon(Icons.done_all, size: 14, color: color),
-        MessageStatus.read =>
-          const Icon(Icons.done_all, size: 14, color: Colors.white),
-      };
+    MessageStatus.sending => Icon(Icons.schedule, size: 12, color: color),
+    MessageStatus.sent => Icon(Icons.done, size: 14, color: color),
+    MessageStatus.delivered => Icon(Icons.done_all, size: 14, color: color),
+    MessageStatus.read => const Icon(
+      Icons.done_all,
+      size: 14,
+      color: Colors.white,
+    ),
+  };
 }
 
 class _ReactionPill extends StatelessWidget {

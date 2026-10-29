@@ -28,7 +28,7 @@ class ChateoAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ImageProvider? getAvatarImage() {
-      if(imageBytes != null) return MemoryImage(imageBytes!);
+      if (imageBytes != null) return MemoryImage(imageBytes!);
       if (imageUrl != null && imageUrl!.isNotEmpty) {
         return NetworkImage(imageUrl!);
       }
@@ -47,29 +47,34 @@ class ChateoAvatar extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(16.0),
             child: Container(
-              width: 48,
-              height: 48,
+              width: 50,
+              height: 50,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: isOnline ? Colors.transparent : AppColors.primaryBrand,
                   width: isOnline ? 0 : 2,
                 ),
                 borderRadius: BorderRadius.circular(16.0),
+                image: avatarImage != null
+                    ? DecorationImage(image: avatarImage, fit: BoxFit.cover)
+                    : null,
+                color: avatarImage == null ? AppColors.offWhiteLight : null,
               ),
               child: avatarImage == null
                   ? (initials != null && initials!.isNotEmpty)
                         ? Center(
-                          child: Text(
+                            child: Text(
                               initials!.toUpperCase(),
                               style: TextStyle(
-                                fontSize: radius,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(
                                   0xFF002DE3,
                                 ), // Primary Brand Color
                               ),
                             ),
-                        )
+                          )
                         : Icon(
                             Icons.person_outline_rounded,
                             size: radius * 0.9,
