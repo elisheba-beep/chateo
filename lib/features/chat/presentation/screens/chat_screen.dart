@@ -97,6 +97,7 @@ class ChatScreen extends ConsumerWidget {
                   if (items.isEmpty) {
                     return const Center(
                       child: Text(
+                        textAlign:TextAlign.center,
                         'No chats yet.\nStart a new one from contacts',
                       ),
                     );
