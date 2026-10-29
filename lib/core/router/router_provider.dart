@@ -129,11 +129,11 @@ GoRouter router(Ref ref) {
         path: '/individualChat',
         name: RouteNames.individualChat,
         builder: (context, state) {
-          final user = state.extra as UserProfile?;
-          if (user == null) {
+          final args = state.extra as ({String chatId, UserProfile user})?;
+          if (args == null) {
             return const PageNotFound(errorMessage: 'No contact selected');
           }
-          return IndividualChatScreen(user: user);
+          return IndividualChatScreen(chatId:args.chatId, user: args.user);
         },
       ),
     ],

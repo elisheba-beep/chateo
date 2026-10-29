@@ -1,7 +1,9 @@
 import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
+import 'package:chateo/features/chat/presentation/providers/delivery_tracker_provider.dart';
 import 'package:chateo/features/chat/presentation/screens/chat_screen.dart';
 import 'package:chateo/features/chat/presentation/screens/more_screen.dart';
+import 'package:chateo/features/users/presentation/providers/presence_provider.dart';
 import 'package:chateo/features/users/presentation/screens/contacts_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -11,7 +13,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
@@ -23,6 +25,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
+
+    ref.watch(presenceTrackerProvider);
+    ref.watch(deliveryTrackerProvider);
+
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,

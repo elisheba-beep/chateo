@@ -1,14 +1,29 @@
+import 'package:chateo/core/theme/app_colors.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
+import 'package:chateo/core/utils/chat_time.dart';
+import 'package:chateo/core/widgets/bubble/chateo_message_bubble.dart';
+import 'package:chateo/core/widgets/divider/chateo_date_divider.dart';
 import 'package:chateo/core/widgets/input/chateo_chat_input_bar.dart';
+import 'package:chateo/features/chat/data/models/chat_message.dart';
+import 'package:chateo/features/chat/data/models/chat_room.dart';
+import 'package:chateo/features/chat/data/repositories/chat_repository.dart';
+import 'package:chateo/features/chat/presentation/providers/message_provider.dart';
+import 'package:chateo/features/users/data/models/presence.dart';
 import 'package:chateo/features/users/data/models/user_profile.dart';
+import 'package:chateo/features/users/presentation/providers/presence_provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class IndividualChatScreen extends ConsumerStatefulWidget {
-  const IndividualChatScreen({required this.user, super.key});
+  const IndividualChatScreen({
+    required this.user,
+    required this.chatId,
+    super.key,
+  });
   final UserProfile user;
+  final String chatId;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -16,13 +31,119 @@ class IndividualChatScreen extends ConsumerStatefulWidget {
 }
 
 class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
+  final _controller = TextEditingController();
+  late final String _me;
+  static const _emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+
+  @override
+  void initState() {
+    super.initState();
+    _me = ref.read(chatRepositoryProvider).currentUid;
+
+    ref.listenManual(chatRoomProvider(widget.chatId), (_, next) {
+      final room = next.value;
+      if (room != null && room.unreadFor(_me) > 0) {
+        ref.read(chatRepositoryProvider).markRead(widget.chatId);
+      }
+    }, fireImmediately: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    _controller.clear();
+
+    try {
+      await ref
+          .read(chatRepositoryProvider)
+          .sendMessage(
+            chatId: widget.chatId,
+            otherUid: widget.user.uid,
+            text: text,
+          );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Message not sent: $e')));
+    }
+  }
+
+  Future<void> _react(ChatMessage m) async {
+    final mine = m.reactions[_me];
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            children: [
+              for (final emoji in _emojis)
+                InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => Navigator.of(dialogContext).pop(emoji),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: emoji == mine
+                          ? Theme.of(context).colorScheme.primary
+                                .withValues(alpha: 0.2)
+                          : null,
+                    ),
+                    child: Text(emoji, style: const TextStyle(fontSize: 28)),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (picked == null) return;
+
+    await ref
+        .read(chatRepositoryProvider)
+        .setReaction(
+          chatId: widget.chatId,
+          messageId: m.id,
+          emoji: picked == mine ? null : picked,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final messages = ref.watch(messagesProvider(widget.chatId));
+    final room = ref.watch(chatRoomProvider(widget.chatId)).value;
+
+    final presence = ref.watch(userPresenceProvider(widget.user.uid)).value;
+    final now = ref.watch(clockProvider).value ?? DateTime.now();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text(widget.user.fullName, style: AppTextStyles.title),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.user.fullName, style: AppTextStyles.title),
+            Text(
+              presence.label(now),
+              style: AppTextStyles.bodyTextSmall.copyWith(
+                color: presence.isOnline(now)
+                    ? AppColors.success
+                    : AppColors.mutedLight,
+              ),
+            ),
+          ],
+        ),
         leading: IconButton(
           onPressed: () {
             context.pop();
@@ -50,7 +171,7 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(right:8.0),
+            padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
               onPressed: () {},
               icon: SvgPicture.asset(
@@ -70,17 +191,67 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
         child: Column(
           children: [
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: ListView.builder(
-                  itemCount: 3,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Text('chat');
-                  },
+              child: messages.when(
+                data: (list) {
+                  if (list.isEmpty) {
+                    return Center(
+                      child: Text('Say hi to ${widget.user.firstName}'),
+                    );
+                  }
+                  return ListView.builder(
+                    reverse: true,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    itemCount: list.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final message = list[index];
+                      final at = message.createdAt ?? DateTime.now();
+                      final isMine = message.senderId == _me;
+
+                      final hasOlder = index + 1 < list.length;
+                      final showDate =
+                          !hasOlder ||
+                          !isSameDay(at, list[index + 1].createdAt ?? at);
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (showDate)
+                            ChateoDateDivider(dateText: dayLabel(at)),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: ChateoMessageBubble(
+                              text: message.text,
+                              time: formatClock(at),
+                              isMine: isMine,
+                              status: isMine
+                                  ? ChatRoom.statusFor(
+                                      message,
+                                      room,
+                                      widget.user.uid,
+                                    )
+                                  : null,
+                              reactions: message.reactions,
+                              onLongPress: () => _react(message),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                error: (e, _) => Center(
+                  child: Text(
+                    'could not load messages.\n$e',
+                    textAlign: TextAlign.center,
+                  ),
                 ),
+                loading: () => const Center(child: CircularProgressIndicator()),
               ),
             ),
-            ChateoChatInputBar(),
+            ChateoChatInputBar(controller: _controller, onSendPressed: _send),
           ],
         ),
       ),

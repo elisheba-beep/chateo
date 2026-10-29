@@ -1,9 +1,14 @@
 import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/router/route_names.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
+import 'package:chateo/core/utils/chat_time.dart';
 import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:chateo/core/widgets/cells/chateo_chat_cell.dart';
 import 'package:chateo/core/widgets/divider/chateo_divider.dart';
+import 'package:chateo/features/chat/data/repositories/chat_repository.dart';
+import 'package:chateo/features/chat/presentation/providers/chat_rooms_provider.dart';
+import 'package:chateo/features/users/data/models/presence.dart';
+import 'package:chateo/features/users/presentation/providers/presence_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +19,11 @@ class ChatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final chatPreviews = ref.watch(chatPreviewsProvider);
+
+    final presences = ref.watch(allPresenceProvider).value ?? const {};
+    final now = ref.watch(clockProvider).value ?? DateTime.now();
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24),
@@ -75,20 +85,52 @@ class ChatScreen extends ConsumerWidget {
             ),
             16.heightBox,
             Expanded(
-              child: ListView.separated(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: 6,
-                separatorBuilder: (BuildContext context, int index) {
-                  return ChateoDivider();
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  return ChateoChatCell(
-                    title: 'User 1 name',
-                    subtitle: 'last message in conversation',
-                    time: 'Today',
-                    unreadCount: 4,
-                    onTap: () {
-                      context.pushNamed(RouteNames.individualChat);
+              child: chatPreviews.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(
+                  child: Text(
+                    'Could not load chats. \n$e',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                data: (items) {
+                  if (items.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No chats yet.\nStart a new one from contacts',
+                      ),
+                    );
+                  }
+                  final me = ref.read(chatRepositoryProvider).currentUid;
+                  return ListView.separated(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    itemCount: items.length,
+                    separatorBuilder: (BuildContext context, int index) {
+                      return ChateoDivider();
+                    },
+                    itemBuilder: (BuildContext context, int index) {
+                      final person = items[index];
+                      final room = person.room;
+                      final last = room.lastMessage ?? '';
+                      return ChateoChatCell(
+                        title: person.user.fullName,
+                        subtitle: room.lastMessageSenderId == me
+                            ? 'You: $last'
+                            : last,
+                        time: room.lastMessageAt == null
+                            ? ''
+                            : chatListTime(room.lastMessageAt!),
+                        unreadCount: room.unreadFor(me),
+                        initials: person.user.initials,
+                        avatarBytes: person.user.imageBytes,
+                        isOnline: presences[person.user.uid].isOnline(now),
+                        onTap: () {
+                          context.pushNamed(
+                            RouteNames.individualChat,
+                            extra: (chatId: room.id, user: person.user),
+                          );
+                        },
+                      );
                     },
                   );
                 },
