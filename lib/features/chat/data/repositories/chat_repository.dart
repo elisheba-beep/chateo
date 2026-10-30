@@ -148,4 +148,47 @@ class ChatRepository {
     }
     await batch.commit();
   }
+
+    Future<void> editMessage({
+    required String chatId,
+    required String messageId,
+    required String newText,
+    required bool isLatest,
+  }) async {
+    final text = newText.trim();
+    if (text.isEmpty) return;
+
+    final roomRef = _rooms.doc(chatId);
+    final batch = _firestore.batch();
+    batch.update(roomRef.collection('messages').doc(messageId), {
+      'text': text,
+      'edited': true,
+    });
+    if (isLatest) {
+      batch.update(roomRef, {
+        'lastMessage': text.length > 100 ? text.substring(0, 100) : text,
+      });
+    }
+    await batch.commit();
+  }
+
+  Future<void> deleteMessage({
+    required String chatId,
+    required String messageId,
+    required bool isLatest,
+  }) async {
+    final roomRef = _rooms.doc(chatId);
+    final batch = _firestore.batch();
+    batch.update(roomRef.collection('messages').doc(messageId), {
+      'text': '',
+      'deleted': true,
+      'edited': FieldValue.delete(),
+      'reactions': FieldValue.delete(),
+      'replyTo': FieldValue.delete(),
+    });
+    if (isLatest) {
+      batch.update(roomRef, {'lastMessage': '', 'lastMessageKind': 'deleted'});
+    }
+    await batch.commit();
+  }
 }

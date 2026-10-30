@@ -25,8 +25,8 @@ class ChatRoom {
   final Map<String, int> unreadCounts;
   final Map<String, DateTime> lastRead;
   final Map<String, DateTime> lastDelivered;
-   final String? lastMessageKind;
-   final String? lastMessageTargetSenderId;
+  final String? lastMessageKind;
+  final String? lastMessageTargetSenderId;
 
   static String idFor(String a, String b) {
     final ids = [a, b]..sort();
@@ -53,36 +53,41 @@ class ChatRoom {
             (k, v) => MapEntry(k as String, (v as num).toInt()),
           ) ??
           const {},
-      lastRead:_times(map['lastRead']),
+      lastRead: _times(map['lastRead']),
       lastDelivered: _times(map['lastDelivered']),
       lastMessageKind: map['lastMessageKind'] as String?,
       lastMessageTargetSenderId: map['lastMessageTargetSenderId'] as String?,
     );
   }
 
-  static Map<String, DateTime> _times(Object? raw)=>{
-     for (final e in (raw as Map? ?? const {}).entries)
-          if (e.value is Timestamp)
-            e.key as String: (e.value as Timestamp).toDate(),
+  static Map<String, DateTime> _times(Object? raw) => {
+    for (final e in (raw as Map? ?? const {}).entries)
+      if (e.value is Timestamp)
+        e.key as String: (e.value as Timestamp).toDate(),
   };
 
   static MessageStatus statusFor(
     ChatMessage m,
     ChatRoom? room,
     String otherUid,
-  ){
+  ) {
     final at = m.createdAt;
     if (at == null) return MessageStatus.sending;
     final read = room?.lastRead[otherUid];
     if (read != null && !at.isAfter(read)) return MessageStatus.read;
     final delivered = room?.lastDelivered[otherUid];
-    if (delivered != null && !at.isAfter(delivered)){
+    if (delivered != null && !at.isAfter(delivered)) {
       return MessageStatus.delivered;
     }
     return MessageStatus.sent;
   }
 
   String previewFor(String me, String otherName) {
+    if (lastMessageKind == 'deleted') {
+      return lastMessageSenderId == me
+          ? 'You deleted this message'
+          : 'This message was deleted';
+    }
     final text = lastMessage ?? '';
     if (lastMessageKind != 'reaction') {
       return lastMessageSenderId == me ? 'You: $text' : text;

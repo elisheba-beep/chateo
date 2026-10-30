@@ -9,13 +9,17 @@ class ChatMessage {
   final DateTime? createdAt;
   final Map<String, String> reactions;
   final ReplyRef? replyTo;
+    final bool edited;
+  final bool deleted;
   ChatMessage({
     required this.id,
     required this.senderId,
     required this.text,
     this.createdAt,
     this.reactions = const {},
-    this.replyTo
+    this.replyTo,
+    this.edited = false,
+    this.deleted = false,
   });
 
   factory ChatMessage.fromMap(Map<String, dynamic> map, {required String id}) {
@@ -29,6 +33,8 @@ class ChatMessage {
           if (e.value is String) e.key as String: e.value as String,
       },
       replyTo: ReplyRef.fromMap(map['replyTo']),
+      edited: map['edited'] as bool? ?? false,
+      deleted: map['deleted'] as bool? ?? false,
     );
   }
 }

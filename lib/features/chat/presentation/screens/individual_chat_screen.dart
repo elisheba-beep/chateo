@@ -33,6 +33,8 @@ class IndividualChatScreen extends ConsumerStatefulWidget {
 
 class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
   ChatMessage? _replyingTo;
+  ChatMessage? _editing;
+  final _focus = FocusNode();
   final _controller = TextEditingController();
   late final String _me;
   static const _emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
@@ -53,15 +55,103 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _focus.dispose();
     super.dispose();
+  }
+
+  void _snack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  bool _isLatest(ChatMessage m) {
+    final newest = ref.read(messagesProvider(widget.chatId)).value?.firstOrNull;
+    final kind =
+        ref.read(chatRoomProvider(widget.chatId)).value?.lastMessageKind ??
+        'text';
+    return newest?.id == m.id && kind == 'text';
+  }
+
+  void _startEdit(ChatMessage m) {
+    setState(() {
+      _editing = m;
+      _replyingTo = null;
+    });
+    _controller.text = m.text;
+    _controller.selection = TextSelection.collapsed(offset: m.text.length);
+    _focus.requestFocus();
+  }
+
+  void _cancelEdit() {
+    setState(() => _editing = null);
+    _controller.clear();
+  }
+
+  Future<void> _confirmDelete(ChatMessage m) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete message?'),
+        content: const Text('It will be removed for everyone in this chat.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: AppColors.danger),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    try {
+      await ref
+          .read(chatRepositoryProvider)
+          .deleteMessage(
+            chatId: widget.chatId,
+            messageId: m.id,
+            isLatest: _isLatest(m),
+          );
+    } catch (e) {
+      _snack('Couldn’t delete message: $e');
+    }
   }
 
   Future<void> _send() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
+
+    final editing = _editing;
+    if (editing != null) {
+      _controller.clear();
+      setState(() => _editing = null);
+      if (text == editing.text) return;
+      try {
+        await ref
+            .read(chatRepositoryProvider)
+            .editMessage(
+              chatId: widget.chatId,
+              messageId: editing.id,
+              newText: text,
+              isLatest: _isLatest(editing),
+            );
+      } catch (e) {
+        _snack('Couldn’t edit message: $e');
+      }
+      return;
+    }
+
     _controller.clear();
     final reply = _replyingTo;
     setState(() => _replyingTo = null);
+
 
     try {
       await ref
@@ -130,7 +220,11 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
   }
 
   void reply(ChatMessage m) {
-    setState(() => _replyingTo = m);
+    if (_editing != null) _controller.clear();
+    setState(() {
+      _editing = null;
+      _replyingTo = m;
+    });
   }
 
   @override
@@ -230,6 +324,25 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
                           !hasOlder ||
                           !isSameDay(at, list[index + 1].createdAt ?? at);
 
+                      final byId = {for (final m in list) m.id: m};
+                      final quoted = message.replyTo;
+                      final original = quoted == null
+                          ? null
+                          : byId[quoted.messageId];
+                      final resolvedReply = quoted == null
+                          ? null
+                          : ReplyRef(
+                              messageId: quoted.messageId,
+                              senderId: quoted.senderId,
+                              text: original == null
+                                  ? quoted
+                                        .text // older than the loaded window
+                                  : (original.deleted
+                                        ? 'This message was deleted'
+                                        : original.text),
+                            );
+                      final canManage = isMine && !message.deleted;
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -249,12 +362,24 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
                                     )
                                   : null,
                               reactions: message.reactions,
-                              reply: message.replyTo,
+                              reply: resolvedReply,
                               replyAuthor: message.replyTo?.senderId == _me
                                   ? 'You'
                                   : widget.user.firstName,
-                              onLongPress: () => _react(message),
-                              onSwipeToReply: () => reply(message),
+                              edited: message.edited,
+                              deleted: message.deleted,
+                              onLongPress: message.deleted
+                                  ? null
+                                  : () => _react(message),
+                              onSwipeToReply: message.deleted
+                                  ? null
+                                  : () => reply(message),
+                              onEdit: canManage
+                                  ? () => _startEdit(message)
+                                  : null,
+                              onDelete: canManage
+                                  ? () => _confirmDelete(message)
+                                  : null,
                             ),
                           ),
                         ],
@@ -273,16 +398,23 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
             ),
             ChateoChatInputBar(
               controller: _controller,
+              focusNode: _focus,
               onSendPressed: _send,
-              header: _replyingTo == null
-                  ? null
-                  : ReplyPreview(
-                      author: _replyingTo!.senderId == _me
-                          ? 'You'
-                          : widget.user.firstName,
-                      text: _replyingTo!.text,
-                      onClose: () => setState(() => _replyingTo = null),
-                    ),
+              header: _editing != null
+                  ? ReplyPreview(
+                      author: 'Edit message',
+                      text: _editing!.text,
+                      onClose: _cancelEdit,
+                    )
+                  : (_replyingTo == null
+                        ? null
+                        : ReplyPreview(
+                            author: _replyingTo!.senderId == _me
+                                ? 'You'
+                                : widget.user.firstName,
+                            text: _replyingTo!.text,
+                            onClose: () => setState(() => _replyingTo = null),
+                          )),
             ),
           ],
         ),

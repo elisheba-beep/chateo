@@ -17,6 +17,10 @@ class ChateoMessageBubble extends StatelessWidget {
     this.reply,
     this.replyAuthor = '',
     this.onSwipeToReply,
+    this.edited = false,
+    this.deleted = false,
+    this.onEdit,
+    this.onDelete,
   });
 
   final String text;
@@ -28,6 +32,10 @@ class ChateoMessageBubble extends StatelessWidget {
   final ReplyRef? reply;
   final String replyAuthor;
   final VoidCallback? onSwipeToReply;
+  final bool edited;
+  final bool deleted;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +51,23 @@ class ChateoMessageBubble extends StatelessWidget {
     final metaStyle = AppTextStyles.bodyTextSmall.copyWith(
       fontSize: 10,
       color: metaColor,
+    );
+
+    final showMenu = !deleted && (onEdit != null || onDelete != null);
+
+    final footerMeta = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(time, style: metaStyle),
+        if (status != null) ...[
+          4.widthBox,
+          _Tick(status!, metaColor),
+          if (status == MessageStatus.read) ...[
+            4.widthBox,
+            Text('Read', style: metaStyle),
+          ],
+        ],
+      ],
     );
 
     Widget bubbleContent = Align(
@@ -70,39 +95,67 @@ class ChateoMessageBubble extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (reply != null)
+                      if (deleted || edited)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            deleted ? '(this message was deleted)' : '(edited)',
+                            style: metaStyle.copyWith(
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      if (reply != null && !deleted)
                         ReplyQuote(
                           author: replyAuthor,
                           text: reply!.text,
                           isMine: isMine,
                           isLight: isLight,
                         ),
-                      Text(
-                        text,
-                        style: AppTextStyles.bodyTextMedium.copyWith(
-                          color: textColor,
+                      if (deleted)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Icon(
+                            Icons.block,
+                            size: 20,
+                            color: textColor.withValues(alpha: 0.7),
+                          ),
+                        )
+                      else
+                        Text(
+                          text,
+                          style: AppTextStyles.bodyTextMedium.copyWith(
+                            color: textColor,
+                          ),
                         ),
-                      ),
                       6.heightBox,
-                      Align(
-                        alignment: isMine
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(time, style: metaStyle),
-                            if (status != null) ...[
-                              4.widthBox,
-                              _Tick(status!, metaColor),
-                              if (status == MessageStatus.read) ...[
-                                4.widthBox,
-                                Text('Read', style: metaStyle),
-                              ],
-                            ],
-                          ],
-                        ),
-                      ),
+                      showMenu
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: isMine
+                                  ? [
+                                      _MoreMenu(
+                                        color: metaColor,
+                                        onEdit: onEdit,
+                                        onDelete: onDelete,
+                                      ),
+                                      footerMeta,
+                                    ]
+                                  : [
+                                      footerMeta,
+                                      _MoreMenu(
+                                        color: metaColor,
+                                        onEdit: onEdit,
+                                        onDelete: onDelete,
+                                      ),
+                                    ],
+                            )
+                          : Align(
+                              alignment: isMine
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: footerMeta,
+                            ),
                     ],
                   ),
                 ),
@@ -138,6 +191,71 @@ class ChateoMessageBubble extends StatelessWidget {
     }
 
     return bubbleContent;
+  }
+}
+
+enum _BubbleAction { edit, delete }
+
+class _MoreMenu extends StatelessWidget {
+  const _MoreMenu({required this.color, this.onEdit, this.onDelete});
+  final Color color;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_BubbleAction>(
+      padding: EdgeInsets.zero,
+      tooltip: 'More',
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onSelected: (action) {
+        switch (action) {
+          case _BubbleAction.edit:
+            onEdit?.call();
+          case _BubbleAction.delete:
+            onDelete?.call();
+        }
+      },
+      itemBuilder: (_) => [
+        if (onEdit != null)
+          const PopupMenuItem(
+            value: _BubbleAction.edit,
+            child: _MenuRow(Icons.edit_outlined, 'Edit'),
+          ),
+        if (onDelete != null)
+          const PopupMenuItem(
+            value: _BubbleAction.delete,
+            child: _MenuRow(
+              Icons.delete_outline,
+              'Delete',
+              color: AppColors.danger,
+            ),
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: Icon(Icons.more_horiz, size: 18, color: color),
+      ),
+    );
+  }
+}
+
+class _MenuRow extends StatelessWidget {
+  const _MenuRow(this.icon, this.label, {this.color});
+  final IconData icon;
+  final String label;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 8),
+        Text(label, style: TextStyle(color: color)),
+      ],
+    );
   }
 }
 
