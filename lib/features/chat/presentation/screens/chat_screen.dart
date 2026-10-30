@@ -7,6 +7,7 @@ import 'package:chateo/core/widgets/cells/chateo_chat_cell.dart';
 import 'package:chateo/core/widgets/divider/chateo_divider.dart';
 import 'package:chateo/features/chat/data/repositories/chat_repository.dart';
 import 'package:chateo/features/chat/presentation/providers/chat_rooms_provider.dart';
+import 'package:chateo/features/stories/presentation/widgets/stories_row.dart';
 import 'package:chateo/features/users/data/models/presence.dart';
 import 'package:chateo/features/users/presentation/providers/presence_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,27 +31,7 @@ class ChatScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24),
         child: Column(
           children: [
-            SizedBox(
-              height: 76,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 6,
-                separatorBuilder: (BuildContext context, int index) {
-                  return 16.widthBox;
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ChateoAvatar(),
-                      4.heightBox,
-                      Text('Your story', style: AppTextStyles.bodyTextSmall),
-                    ],
-                  );
-                },
-              ),
-            ),
+            const StoriesRow(),
             16.heightBox,
             ChateoDivider(),
             16.heightBox,
@@ -128,7 +109,7 @@ class ChatScreen extends ConsumerWidget {
                       final room = person.room;
                       return ChateoChatCell(
                         title: person.user.fullName,
-                       subtitle: room.previewFor(me, person.user.firstName),
+                        subtitle: room.previewFor(me, person.user.firstName),
                         time: room.lastMessageAt == null
                             ? ''
                             : chatListTime(room.lastMessageAt!),

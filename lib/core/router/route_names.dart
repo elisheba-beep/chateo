@@ -1,4 +1,4 @@
-class RouteNames{
+class RouteNames {
   static const walkthrough = 'walkthrough';
   static const phoneNumberInput = 'phoneNumberInput';
   static const verificationCodeInput = 'verificationCodeInput';
@@ -6,4 +6,6 @@ class RouteNames{
   static const home = 'home';
   static const individualChat = 'individualChat';
   static const account = 'account';
+  static const storyComposer = 'storyComposer';
+  static const storyViewer = 'storyViewer';
 }

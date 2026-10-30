@@ -9,6 +9,9 @@ import 'package:chateo/features/auth/presentation/screens/profile_registration_s
 import 'package:chateo/features/chat/presentation/screens/home_screen.dart';
 import 'package:chateo/features/chat/presentation/screens/individual_chat_screen.dart';
 import 'package:chateo/features/onboarding/presentation/screens/walkthrough_screen.dart';
+import 'package:chateo/features/stories/data/models/story.dart';
+import 'package:chateo/features/stories/presentation/screens/story_composer_screen.dart';
+import 'package:chateo/features/stories/presentation/screens/story_viewer_screen.dart';
 import 'package:chateo/features/users/data/models/user_profile.dart';
 import 'package:chateo/features/users/data/repositories/profile_repository.dart';
 import 'package:chateo/features/users/presentation/screens/account_screen.dart';
@@ -75,10 +78,12 @@ GoRouter router(Ref ref) {
       };
 
       if (!signedIn) {
-               if (loc == '/profileRegistration' ||
+        if (loc == '/profileRegistration' ||
             loc == '/home' ||
             loc == '/individualChat' ||
-            loc == '/account') {
+            loc == '/account' ||
+            loc == '/storyComposer' ||
+            loc == '/storyViewer') {
           return '/phoneNumberInput';
         }
         return null;
@@ -135,13 +140,29 @@ GoRouter router(Ref ref) {
           if (args == null) {
             return const PageNotFound(errorMessage: 'No contact selected');
           }
-          return IndividualChatScreen(chatId:args.chatId, user: args.user);
+          return IndividualChatScreen(chatId: args.chatId, user: args.user);
         },
       ),
-            GoRoute(
+      GoRoute(
         path: '/account',
         name: RouteNames.account,
         builder: (context, state) => const AccountScreen(),
+      ),
+      GoRoute(
+        path: '/storyComposer',
+        name: RouteNames.storyComposer,
+        builder: (context, state) => const StoryComposerScreen(),
+      ),
+      GoRoute(
+        path: '/storyViewer',
+        name: RouteNames.storyViewer,
+        builder: (context, state) {
+          final group = state.extra as StoryGroup?;
+          if (group == null) {
+            return const PageNotFound(errorMessage: 'No story selected');
+          }
+          return StoryViewerScreen(group: group);
+        },
       ),
     ],
     errorBuilder: (context, state) =>
