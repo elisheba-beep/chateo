@@ -123,14 +123,29 @@ class ChatRepository {
     });
   }
 
-  Future<void> setReaction({
+   Future<void> setReaction({
     required String chatId,
     required ChatMessage message,
     String? emoji,
-  }) {
+  }) async {
     final me = currentUid;
-    return _rooms.doc(chatId).collection('messages').doc(message.id).update({
+    final roomRef = _rooms.doc(chatId);
+    final batch = _firestore.batch();
+
+    batch.update(roomRef.collection('messages').doc(message.id), {
       'reactions.$me': emoji ?? FieldValue.delete(),
     });
+
+    if (emoji != null && message.senderId != me) {
+      batch.update(roomRef, {
+        'lastMessage': emoji,
+        'lastMessageKind': 'reaction',
+        'lastMessageSenderId': me,
+        'lastMessageTargetSenderId': message.senderId,
+        'lastMessageAt': FieldValue.serverTimestamp(),
+        'unreadCounts.${message.senderId}': FieldValue.increment(1),
+      });
+    }
+    await batch.commit();
   }
 }

@@ -12,6 +12,8 @@ class ChatRoom {
     this.unreadCounts = const {},
     this.lastRead = const {},
     this.lastDelivered = const {},
+    this.lastMessageKind,
+    this.lastMessageTargetSenderId,
   });
 
   final String id;
@@ -23,6 +25,8 @@ class ChatRoom {
   final Map<String, int> unreadCounts;
   final Map<String, DateTime> lastRead;
   final Map<String, DateTime> lastDelivered;
+   final String? lastMessageKind;
+   final String? lastMessageTargetSenderId;
 
   static String idFor(String a, String b) {
     final ids = [a, b]..sort();
@@ -51,6 +55,8 @@ class ChatRoom {
           const {},
       lastRead:_times(map['lastRead']),
       lastDelivered: _times(map['lastDelivered']),
+      lastMessageKind: map['lastMessageKind'] as String?,
+      lastMessageTargetSenderId: map['lastMessageTargetSenderId'] as String?,
     );
   }
 
@@ -74,5 +80,15 @@ class ChatRoom {
       return MessageStatus.delivered;
     }
     return MessageStatus.sent;
+  }
+
+  String previewFor(String me, String otherName) {
+    final text = lastMessage ?? '';
+    if (lastMessageKind != 'reaction') {
+      return lastMessageSenderId == me ? 'You: $text' : text;
+    }
+    return lastMessageSenderId == me
+        ? 'You reacted $text to $otherName’s message'
+        : '$otherName reacted $text to your message';
   }
 }

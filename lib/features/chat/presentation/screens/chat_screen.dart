@@ -126,12 +126,9 @@ class ChatScreen extends ConsumerWidget {
                     itemBuilder: (BuildContext context, int index) {
                       final person = list[index];
                       final room = person.room;
-                      final last = room.lastMessage ?? '';
                       return ChateoChatCell(
                         title: person.user.fullName,
-                        subtitle: room.lastMessageSenderId == me
-                            ? 'You: $last'
-                            : last,
+                       subtitle: room.previewFor(me, person.user.firstName),
                         time: room.lastMessageAt == null
                             ? ''
                             : chatListTime(room.lastMessageAt!),
