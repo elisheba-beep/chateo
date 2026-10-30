@@ -25,9 +25,9 @@ class ChateoMessageBubble extends StatelessWidget {
   final MessageStatus? status;
   final Map<String, String> reactions;
   final VoidCallback? onLongPress;
-  final ReplyRef? reply; 
+  final ReplyRef? reply;
   final String replyAuthor;
-   final VoidCallback? onSwipeToReply;
+  final VoidCallback? onSwipeToReply;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +45,7 @@ class ChateoMessageBubble extends StatelessWidget {
       color: metaColor,
     );
 
-     Widget bubbleContent = Align(
+    Widget bubbleContent = Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -59,48 +59,54 @@ class ChateoMessageBubble extends StatelessWidget {
           children: [
             GestureDetector(
               onLongPress: onLongPress,
-              child:Container(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-                decoration: BoxDecoration(
-                  color: background,
-                  borderRadius: BorderRadius.circular(12),
+              child: IntrinsicWidth(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+                  decoration: BoxDecoration(
+                    color: background,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (reply != null)
+                        ReplyQuote(
+                          author: replyAuthor,
+                          text: reply!.text,
+                          isMine: isMine,
+                          isLight: isLight,
+                        ),
+                      Text(
+                        text,
+                        style: AppTextStyles.bodyTextMedium.copyWith(
+                          color: textColor,
+                        ),
+                      ),
+                      6.heightBox,
+                      Align(
+                        alignment: isMine
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(time, style: metaStyle),
+                            if (status != null) ...[
+                              4.widthBox,
+                              _Tick(status!, metaColor),
+                              if (status == MessageStatus.read) ...[
+                                4.widthBox,
+                                Text('Read', style: metaStyle),
+                              ],
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-  child: Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      if (reply != null)
-        ReplyQuote(
-          author: replyAuthor,
-          text: reply!.text,
-          isMine: isMine,
-          isLight: isLight,
-        ),
-      Text(
-        text,
-        style: AppTextStyles.bodyTextMedium.copyWith(color: textColor),
-      ),
-      6.heightBox,
-      Align(
-        alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(time, style: metaStyle),
-            if (status != null) ...[
-              4.widthBox,
-              _Tick(status!, metaColor),
-              if (status == MessageStatus.read) ...[
-                4.widthBox,
-                Text('Read', style: metaStyle),
-              ],
-            ],
-          ],
-        ),
-      ),
-    ],
-  ),
-),
+              ),
             ),
             if (reactions.isNotEmpty)
               _ReactionPill(reactions: reactions, isLight: isLight),
@@ -109,15 +115,13 @@ class ChateoMessageBubble extends StatelessWidget {
       ),
     );
 
-
-
- if (onSwipeToReply != null) {
+    if (onSwipeToReply != null) {
       return Dismissible(
         key: UniqueKey(),
-        direction: DismissDirection.startToEnd, 
+        direction: DismissDirection.startToEnd,
         confirmDismiss: (direction) async {
-          onSwipeToReply!(); 
-          return false; 
+          onSwipeToReply!();
+          return false;
         },
         background: Align(
           alignment: Alignment.centerLeft,
@@ -136,7 +140,6 @@ class ChateoMessageBubble extends StatelessWidget {
     return bubbleContent;
   }
 }
-
 
 class _Tick extends StatelessWidget {
   const _Tick(this.status, this.color);
