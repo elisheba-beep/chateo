@@ -5,5 +5,5 @@ class RouteNames{
   static const profileRegistration = 'profileRegistration';
   static const home = 'home';
   static const individualChat = 'individualChat';
-  
+  static const account = 'account';
 }

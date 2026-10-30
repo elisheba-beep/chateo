@@ -11,6 +11,7 @@ import 'package:chateo/features/chat/presentation/screens/individual_chat_screen
 import 'package:chateo/features/onboarding/presentation/screens/walkthrough_screen.dart';
 import 'package:chateo/features/users/data/models/user_profile.dart';
 import 'package:chateo/features/users/data/repositories/profile_repository.dart';
+import 'package:chateo/features/users/presentation/screens/account_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -74,9 +75,10 @@ GoRouter router(Ref ref) {
       };
 
       if (!signedIn) {
-        if (loc == '/profileRegistration' ||
+               if (loc == '/profileRegistration' ||
             loc == '/home' ||
-            loc == '/individualChat') {
+            loc == '/individualChat' ||
+            loc == '/account') {
           return '/phoneNumberInput';
         }
         return null;
@@ -135,6 +137,11 @@ GoRouter router(Ref ref) {
           }
           return IndividualChatScreen(chatId:args.chatId, user: args.user);
         },
+      ),
+            GoRoute(
+        path: '/account',
+        name: RouteNames.account,
+        builder: (context, state) => const AccountScreen(),
       ),
     ],
     errorBuilder: (context, state) =>

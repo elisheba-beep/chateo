@@ -48,4 +48,4 @@ final class DeliveryTrackerProvider
   }
 }
 
-String _$deliveryTrackerHash() => r'7a6d1a4101c05087ea8405303f6a8cce68fee537';
+String _$deliveryTrackerHash() => r'8c235b7d0b6db72c2f1e240650ef55c8b409d485';

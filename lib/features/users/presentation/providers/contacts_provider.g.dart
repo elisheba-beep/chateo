@@ -48,7 +48,7 @@ final class ContactsProvider
   }
 }
 
-String _$contactsHash() => r'96a8b055caa11db94e80b0aa0bc286f8287ef083';
+String _$contactsHash() => r'a51700c71daab2945e6e3022d6f2bec1be407819';
 
 @ProviderFor(ContactSearch)
 final contactSearchProvider = ContactSearchProvider._();

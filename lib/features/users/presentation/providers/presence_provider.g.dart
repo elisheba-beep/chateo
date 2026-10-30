@@ -48,7 +48,7 @@ final class AllPresenceProvider
   }
 }
 
-String _$allPresenceHash() => r'b229659ccf7e3093d497e66dd732bc3429ca2b64';
+String _$allPresenceHash() => r'9291a3654c5dd3be82b65bc776429cf64419bc37';
 
 @ProviderFor(userPresence)
 final userPresenceProvider = UserPresenceFamily._();
@@ -193,4 +193,4 @@ final class PresenceTrackerProvider
   }
 }
 
-String _$presenceTrackerHash() => r'377202094d356c2cbaa37749900edccbc8743b99';
+String _$presenceTrackerHash() => r'b500c171b673eeeeb7d102eb09ebf1aef0d61c4f';

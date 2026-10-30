@@ -1,5 +1,6 @@
 import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/providers/firebase_providers.dart';
+import 'package:chateo/core/router/route_names.dart';
 import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:chateo/core/widgets/divider/chateo_divider.dart';
 import 'package:chateo/features/chat/data/mock_Settings.dart';
@@ -8,6 +9,7 @@ import 'package:chateo/features/chat/presentation/widgets/settings_tile.dart';
 import 'package:chateo/features/users/presentation/providers/current_user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -77,7 +79,9 @@ class MoreScreen extends ConsumerWidget {
                 return SettingsTile(
                   title: setting.title,
                   iconPath: setting.iconPath,
-                  onTap: setting.onTap,
+                  onTap: setting.title == 'Account'
+                      ? () => context.pushNamed(RouteNames.account)
+                      : setting.onTap,
                 );
               }, childCount: accountSettings.length),
             ),
@@ -101,7 +105,7 @@ class MoreScreen extends ConsumerWidget {
               }, childCount: chateoSettings.length),
             ),
           ),
-           SliverToBoxAdapter(child: ChateoDivider()),
+          SliverToBoxAdapter(child: ChateoDivider()),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             sliver: SliverList(

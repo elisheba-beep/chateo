@@ -9,3 +9,7 @@ FirebaseAuth firebaseAuth(Ref ref) => FirebaseAuth.instance;
 
 @Riverpod(keepAlive: true)
 FirebaseFirestore firebaseFirestore(Ref ref) => FirebaseFirestore.instance;
+
+@Riverpod(keepAlive: true)
+Stream<String?> authUid(Ref ref) =>
+    ref.watch(firebaseAuthProvider).authStateChanges().map((u) => u?.uid);

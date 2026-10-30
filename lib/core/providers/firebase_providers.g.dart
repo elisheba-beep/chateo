@@ -96,3 +96,36 @@ final class FirebaseFirestoreProvider
 }
 
 String _$firebaseFirestoreHash() => r'211c9d7cd91051da8adfacbf85a09b8bad1d41e8';
+
+@ProviderFor(authUid)
+final authUidProvider = AuthUidProvider._();
+
+final class AuthUidProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, Stream<String?>>
+    with $FutureModifier<String?>, $StreamProvider<String?> {
+  AuthUidProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'authUidProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$authUidHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<String?> create(Ref ref) {
+    return authUid(ref);
+  }
+}
+
+String _$authUidHash() => r'04a10c0965d4649e202f853ff835a259e58bf6a0';
