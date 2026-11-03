@@ -21,6 +21,7 @@ class ChateoMessageBubble extends StatelessWidget {
     this.deleted = false,
     this.onEdit,
     this.onDelete,
+    this.selected = false,
   });
 
   final String text;
@@ -36,6 +37,7 @@ class ChateoMessageBubble extends StatelessWidget {
   final bool deleted;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +92,13 @@ class ChateoMessageBubble extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: background,
                     borderRadius: BorderRadius.circular(12),
+                    boxShadow: selected ? [
+                      BoxShadow(
+                        color: Theme.of(context).shadowColor.withValues(alpha: .22),
+                        blurRadius: 22,
+                        spreadRadius: 2,
+                      ),
+                    ]:null
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

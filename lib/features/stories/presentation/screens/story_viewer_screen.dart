@@ -32,7 +32,8 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   void initState() {
     super.initState();
     _isMine =
-        ref.read(firebaseAuthProvider).currentUser?.uid == widget.group.user.uid;
+        ref.read(firebaseAuthProvider).currentUser?.uid ==
+        widget.group.user.uid;
 
     final seen = ref.read(seenStoriesProvider);
     final firstUnseen = _stories.indexWhere((s) => !seen.contains(s.id));
@@ -76,7 +77,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
     if (_index > 0) {
       _goTo(_index - 1);
     } else {
-      _start(); 
+      _start();
     }
   }
 
@@ -85,6 +86,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   }
 
   Future<void> _delete() async {
+    final messenger = ScaffoldMessenger.of(context);
     _progress.stop();
     final ok = await showDialog<bool>(
       context: context,
@@ -98,22 +100,24 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.redAccent),
+            ),
           ),
         ],
       ),
     );
     if (!mounted) return;
     if (ok != true) {
-      _progress.forward(); 
+      _progress.forward();
       return;
     }
     try {
       await ref.read(storyRepositoryProvider).delete(_story.id);
       _close();
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Couldn’t delete: $e')));
+      messenger.showSnackBar(SnackBar(content: Text('Couldn’t delete: $e')));
       _progress.forward();
     }
   }
@@ -131,10 +135,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
           final third = MediaQuery.sizeOf(context).width / 3;
           d.globalPosition.dx < third ? _prev() : _next();
         },
-        onLongPressStart: (_) => _progress.stop(), 
+        onLongPressStart: (_) => _progress.stop(),
         onLongPressEnd: (_) => _progress.forward(),
         onVerticalDragEnd: (d) {
-          if ((d.primaryVelocity ?? 0) > 300) _close(); 
+          if ((d.primaryVelocity ?? 0) > 300) _close();
         },
         child: Container(
           decoration: BoxDecoration(gradient: storyGradient(story.bg)),
@@ -150,7 +154,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                         for (var i = 0; i < _stories.length; i++)
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                              ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(2),
                                 child: LinearProgressIndicator(
@@ -203,7 +209,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                       ),
                       if (_isMine)
                         IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.white),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
+                          ),
                           onPressed: _delete,
                         ),
                       IconButton(

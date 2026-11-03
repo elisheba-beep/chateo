@@ -8,10 +8,13 @@ import 'package:chateo/features/chat/data/models/chat_message.dart';
 import 'package:chateo/features/chat/data/models/chat_room.dart';
 import 'package:chateo/features/chat/data/repositories/chat_repository.dart';
 import 'package:chateo/features/chat/presentation/providers/message_provider.dart';
+import 'package:chateo/features/chat/presentation/widgets/message_action_menu.dart';
+import 'package:chateo/features/chat/presentation/widgets/reaction_toolbar.dart';
 import 'package:chateo/features/chat/presentation/widgets/reply_preview.dart';
 import 'package:chateo/features/users/data/models/presence.dart';
 import 'package:chateo/features/users/data/models/user_profile.dart';
 import 'package:chateo/features/users/presentation/providers/presence_provider.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -34,6 +37,11 @@ class IndividualChatScreen extends ConsumerStatefulWidget {
 class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
   ChatMessage? _replyingTo;
   ChatMessage? _editing;
+  ChatMessage? _selectedMessage;
+  final LayerLink _selectionLink = LayerLink();
+  OverlayEntry? _selectionEntry;
+  final GlobalKey _selectedBubbleKey = GlobalKey();
+
   final _focus = FocusNode();
   final _controller = TextEditingController();
   late final String _me;
@@ -152,7 +160,6 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
     final reply = _replyingTo;
     setState(() => _replyingTo = null);
 
-
     try {
       await ref
           .read(chatRepositoryProvider)
@@ -175,48 +182,193 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
     }
   }
 
-  Future<void> _react(ChatMessage m) async {
-    final mine = m.reactions[_me];
-    final picked = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            children: [
-              for (final emoji in _emojis)
-                InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => Navigator.of(dialogContext).pop(emoji),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: emoji == mine
-                          ? Theme.of(context).colorScheme.primary
-                                .withValues(alpha: 0.2)
-                          : null,
+  void _selectMessage(ChatMessage message) {
+    if (message.deleted) return;
+    _focus.unfocus();
+    setState(() {
+      _selectedMessage = message;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _selectedMessage?.id != message.id) return;
+      _showSelectionOverlay(message);
+    });
+  }
+
+  double _calculateSelectionOffset({required bool canManage}) {
+    final targetContext = _selectedBubbleKey.currentContext;
+    if (targetContext == null) return 0.0;
+    final renderObject = targetContext.findRenderObject();
+
+    if (renderObject is! RenderBox || !renderObject.hasSize) {
+      return 0.0;
+    }
+
+    final targetTop = renderObject.localToGlobal(Offset.zero).dy;
+    final targetBottom = targetTop + renderObject.size.height;
+
+    final mediaQuery = MediaQuery.of(context);
+
+    const tileHeight = 41.0;
+    const reactionToolbarHeight = 48.0;
+    const spacing = 10.0;
+
+    final menuHeight = canManage ? tileHeight * 4 : tileHeight * 2;
+    final topLimit = mediaQuery.padding.top + 12;
+    final bottomLimit = mediaQuery.size.height - mediaQuery.padding.bottom - 12;
+    final selectionTop = targetTop - reactionToolbarHeight - spacing;
+    final selectionBottom = targetBottom + spacing + menuHeight;
+    if (selectionBottom > bottomLimit) {
+      return -(selectionBottom - bottomLimit);
+    }
+
+    if (selectionTop < topLimit) {
+      return topLimit - selectionTop;
+    }
+
+    return 0.0;
+  }
+
+  void _showSelectionOverlay(ChatMessage message) {
+    _removeSelectionOverlay();
+    final room = ref.watch(chatRoomProvider(widget.chatId)).value;
+    final isMine = message.senderId == _me;
+    final canManage = isMine && !message.deleted;
+    final selectionOffset = _calculateSelectionOffset(canManage: canManage);
+    final myReaction = message.reactions[_me];
+    final at = message.createdAt ?? DateTime.now();
+
+    _selectionEntry = OverlayEntry(
+      builder: (_) {
+        final isLight = Theme.of(context).brightness == Brightness.light;
+        final bubble = ChateoMessageBubble(
+          text: message.text,
+          time: formatClock(at),
+          isMine: isMine,
+          status: isMine
+              ? ChatRoom.statusFor(message, room, widget.user.uid)
+              : null,
+          reactions: message.reactions,
+          reply: message.replyTo,
+          replyAuthor: message.replyTo?.senderId == _me
+              ? 'You'
+              : widget.user.firstName,
+          edited: message.edited,
+          deleted: message.deleted,
+          selected: true,
+        );
+
+        return Material(
+          type: MaterialType.transparency,
+          child: SizedBox.expand(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _dismissSelection,
+                    child: ColoredBox(
+                      color: Colors.black.withValues(
+                        alpha: isLight ? 0.32 : 0.52,
+                      ),
                     ),
-                    child: Text(emoji, style: const TextStyle(fontSize: 28)),
                   ),
                 ),
-            ],
+                CompositedTransformFollower(
+                  link: _selectionLink,
+                  showWhenUnlinked: false,
+                  targetAnchor: Alignment.center,
+                  followerAnchor: Alignment.center,
+                  offset: isMine
+                      ? Offset(-20, selectionOffset)
+                      : Offset(20, selectionOffset),
+
+                  child: bubble,
+                ),
+                CompositedTransformFollower(
+                  link: _selectionLink,
+                  showWhenUnlinked: false,
+                  targetAnchor: isMine ? Alignment.topRight : Alignment.topLeft,
+                  followerAnchor: isMine
+                      ? Alignment.bottomRight
+                      : Alignment.bottomLeft,
+                  offset: Offset(0, selectionOffset - 10),
+                  child: ReactionToolbar(
+                    emojis: _emojis,
+                    selectedEmoji: myReaction,
+                    onSelected: (emoji) async {
+                      _dismissSelection();
+                      try {
+                        await ref
+                            .read(chatRepositoryProvider)
+                            .setReaction(
+                              chatId: widget.chatId,
+                              message: message,
+                              emoji: emoji == myReaction ? null : emoji,
+                            );
+                      } catch (e) {
+                        _snack('Couldn’t react to message: $e');
+                      }
+                    },
+                  ),
+                ),
+                CompositedTransformFollower(
+                  link: _selectionLink,
+                  showWhenUnlinked: false,
+                  targetAnchor: isMine
+                      ? Alignment.bottomRight
+                      : Alignment.bottomLeft,
+                  followerAnchor: isMine
+                      ? Alignment.topRight
+                      : Alignment.topLeft,
+                  offset: Offset(0, selectionOffset + 10),
+                  child: MessageActionMenu(
+                    onReply: () {
+                      _dismissSelection();
+                      reply(message);
+                    },
+                    onCopy: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: message.text),
+                      );
+                      _dismissSelection();
+                      _snack('Message copied');
+                    },
+                    onEdit: canManage
+                        ? () {
+                            _dismissSelection();
+                            _startEdit(message);
+                          }
+                        : null,
+                    onDelete: canManage
+                        ? () {
+                            _dismissSelection();
+                            _confirmDelete(message);
+                          }
+                        : null,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-
-    if (picked == null) return;
-
-    await ref
-        .read(chatRepositoryProvider)
-        .setReaction(
-          chatId: widget.chatId,
-          message: m,
-          emoji: picked == mine ? null : picked,
         );
+      },
+    );
+    Overlay.of(context).insert(_selectionEntry!);
+  }
+
+  void _removeSelectionOverlay() {
+    _selectionEntry?.remove();
+    _selectionEntry = null;
+  }
+
+  void _dismissSelection() {
+    _removeSelectionOverlay();
+    if (mounted) {
+      setState(() {
+        _selectedMessage = null;
+      });
+    }
   }
 
   void reply(ChatMessage m) {
@@ -335,14 +487,33 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
                               messageId: quoted.messageId,
                               senderId: quoted.senderId,
                               text: original == null
-                                  ? quoted
-                                        .text // older than the loaded window
+                                  ? quoted.text
                                   : (original.deleted
                                         ? 'This message was deleted'
                                         : original.text),
                             );
-                      final canManage = isMine && !message.deleted;
 
+                      final bubble = ChateoMessageBubble(
+                        text: message.text,
+                        time: formatClock(at),
+                        isMine: isMine,
+                        status: isMine
+                            ? ChatRoom.statusFor(message, room, widget.user.uid)
+                            : null,
+                        reactions: message.reactions,
+                        reply: resolvedReply,
+                        replyAuthor: message.replyTo?.senderId == _me
+                            ? 'You'
+                            : widget.user.firstName,
+                        edited: message.edited,
+                        deleted: message.deleted,
+                        onLongPress: message.deleted
+                            ? null
+                            : () => _selectMessage(message),
+                        onSwipeToReply: message.deleted
+                            ? null
+                            : () => reply(message),
+                      );
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -350,37 +521,13 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
                             ChateoDateDivider(dateText: dayLabel(at)),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8),
-                            child: ChateoMessageBubble(
-                              text: message.text,
-                              time: formatClock(at),
-                              isMine: isMine,
-                              status: isMine
-                                  ? ChatRoom.statusFor(
-                                      message,
-                                      room,
-                                      widget.user.uid,
-                                    )
-                                  : null,
-                              reactions: message.reactions,
-                              reply: resolvedReply,
-                              replyAuthor: message.replyTo?.senderId == _me
-                                  ? 'You'
-                                  : widget.user.firstName,
-                              edited: message.edited,
-                              deleted: message.deleted,
-                              onLongPress: message.deleted
-                                  ? null
-                                  : () => _react(message),
-                              onSwipeToReply: message.deleted
-                                  ? null
-                                  : () => reply(message),
-                              onEdit: canManage
-                                  ? () => _startEdit(message)
-                                  : null,
-                              onDelete: canManage
-                                  ? () => _confirmDelete(message)
-                                  : null,
-                            ),
+                            child: message.id == _selectedMessage?.id
+                                ? CompositedTransformTarget(
+                                    key: _selectedBubbleKey,
+                                    link: _selectionLink,
+                                    child: bubble,
+                                  )
+                                : bubble,
                           ),
                         ],
                       );

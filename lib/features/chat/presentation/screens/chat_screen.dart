@@ -2,7 +2,6 @@ import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/router/route_names.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/core/utils/chat_time.dart';
-import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:chateo/core/widgets/cells/chateo_chat_cell.dart';
 import 'package:chateo/core/widgets/divider/chateo_divider.dart';
 import 'package:chateo/features/chat/data/repositories/chat_repository.dart';
