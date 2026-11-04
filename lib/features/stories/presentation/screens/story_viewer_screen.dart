@@ -184,6 +184,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                         size: 40,
                         imageBytes: user.imageBytes,
                         initials: user.initials,
+                        seed: user.uid,
                       ),
                       const SizedBox(width: 10),
                       Expanded(

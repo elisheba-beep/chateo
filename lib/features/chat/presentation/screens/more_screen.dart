@@ -32,7 +32,8 @@ class MoreScreen extends ConsumerWidget {
                   leading: ChateoAvatar(
                     imageBytes: user?.imageBytes,
                     initials: user?.initials,
-                    radius: 24,
+                    size: 48,
+                    seed: user?.uid,
                   ),
                   title: Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),

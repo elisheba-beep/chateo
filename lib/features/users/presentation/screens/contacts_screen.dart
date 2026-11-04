@@ -1,9 +1,11 @@
 import 'package:chateo/core/constants/sized_boxes.dart';
 import 'package:chateo/core/router/route_names.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
+import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:chateo/core/widgets/cells/chateo_chat_cell.dart';
 import 'package:chateo/core/widgets/divider/chateo_divider.dart';
 import 'package:chateo/features/chat/data/repositories/chat_repository.dart';
+import 'package:chateo/features/stories/presentation/providers/stories_provider.dart';
 import 'package:chateo/features/users/data/models/presence.dart';
 import 'package:chateo/features/users/presentation/providers/contacts_provider.dart';
 import 'package:chateo/features/users/presentation/providers/presence_provider.dart';
@@ -62,6 +64,7 @@ class ContactsScreen extends ConsumerWidget {
             Expanded(
               child: contacts.when(
                 data: (users) {
+                  final rings = ref.watch(storyRingsProvider);
                   final list = query.isEmpty
                       ? users
                       : users
@@ -86,24 +89,32 @@ class ContactsScreen extends ConsumerWidget {
                       final user = list[index];
                       final presence = presences[user.uid];
                       return ChateoChatCell(
+                        seed: user.uid, // chat_screen: person.user.uid
+                        ring: rings[user.uid] ?? StoryRing.none,
                         title: user.fullName,
                         subtitle: presence.label(now),
                         isOnline: presence.isOnline(now),
                         time: '',
                         initials: user.initials,
                         avatarBytes: user.imageBytes,
-                        onTap: () async{
-                          try{
-                            final chatId = await ref.read(chatRepositoryProvider).getOrCreateChatRoom(user.uid);
-                            if(!context.mounted)return;
+                        onTap: () async {
+                          try {
+                            final chatId = await ref
+                                .read(chatRepositoryProvider)
+                                .getOrCreateChatRoom(user.uid);
+                            if (!context.mounted) return;
 
-                          context.pushNamed(
-                            RouteNames.individualChat,
-                            extra: (chatId:chatId, user:user),
-                          );
-                          }catch(e){
-                            if(!context.mounted)return;
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('could not open chat: $e'),),);
+                            context.pushNamed(
+                              RouteNames.individualChat,
+                              extra: (chatId: chatId, user: user),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('could not open chat: $e'),
+                              ),
+                            );
                           }
                         },
                       );

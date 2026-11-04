@@ -13,6 +13,8 @@ class ChateoChatCell extends StatelessWidget {
   final VoidCallback? onTap;
   final Uint8List? avatarBytes;
   final String? initials;
+  final String? seed;
+  final StoryRing ring;
 
   const ChateoChatCell({
     super.key,
@@ -25,6 +27,8 @@ class ChateoChatCell extends StatelessWidget {
     this.onTap,
     this.avatarBytes,
     this.initials,
+    this.seed,
+    this.ring = StoryRing.none,
   });
 
   @override
@@ -39,10 +43,11 @@ class ChateoChatCell extends StatelessWidget {
           children: [
             ChateoAvatar(
               imageUrl: avatarUrl,
-              radius: 26,
               isOnline: isOnline,
               imageBytes: avatarBytes,
               initials: initials,
+              seed: seed,
+              ring: ring,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -65,7 +70,7 @@ class ChateoChatCell extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color:  const Color(0xFFADB5BD), // Muted state color
+                      color: const Color(0xFFADB5BD), // Muted state color
                       fontWeight: unreadCount > 0
                           ? FontWeight.w400
                           : FontWeight.w300,

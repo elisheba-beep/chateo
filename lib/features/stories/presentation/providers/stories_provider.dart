@@ -1,4 +1,5 @@
 import 'package:chateo/core/providers/firebase_providers.dart';
+import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:chateo/features/stories/data/models/story.dart';
 import 'package:chateo/features/stories/data/repositories/story_repository.dart';
 import 'package:chateo/features/users/data/models/user_profile.dart';
@@ -92,4 +93,14 @@ StoryFeed storyFeed(Ref ref) {
   });
 
   return StoryFeed(mine: mine, others: others);
+}
+
+@riverpod
+Map<String, StoryRing> storyRings(Ref ref) {
+  final feed = ref.watch(storyFeedProvider);
+  final seen = ref.watch(seenStoriesProvider);
+  return {
+    for (final g in [if (feed.mine != null) feed.mine!, ...feed.others])
+      g.user.uid: g.hasUnseen(seen) ? StoryRing.unseen : StoryRing.seen,
+  };
 }

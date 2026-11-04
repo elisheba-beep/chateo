@@ -140,3 +140,50 @@ final class StoryFeedProvider
 }
 
 String _$storyFeedHash() => r'8d804ce9f745ea50502768a334ec109289531a07';
+
+@ProviderFor(storyRings)
+final storyRingsProvider = StoryRingsProvider._();
+
+final class StoryRingsProvider
+    extends
+        $FunctionalProvider<
+          Map<String, StoryRing>,
+          Map<String, StoryRing>,
+          Map<String, StoryRing>
+        >
+    with $Provider<Map<String, StoryRing>> {
+  StoryRingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'storyRingsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$storyRingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<Map<String, StoryRing>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Map<String, StoryRing> create(Ref ref) {
+    return storyRings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, StoryRing> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, StoryRing>>(value),
+    );
+  }
+}
+
+String _$storyRingsHash() => r'a2c4f203571ce497a2a05f676c30d25ad5733208';

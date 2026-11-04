@@ -6,6 +6,7 @@ import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/core/widgets/avatar/chateo_avatar.dart';
 import 'package:chateo/core/widgets/button/chateo_button.dart';
 import 'package:chateo/core/widgets/input/chateo_text_field.dart';
+import 'package:chateo/features/users/data/repositories/profile_repository.dart';
 import 'package:go_router/go_router.dart';
 import 'package:chateo/features/users/presentation/providers/profile_provider.dart';
 import 'package:material_ui/material_ui.dart';
@@ -93,7 +94,8 @@ class _ProfileRegistrationScreenState
               40.heightBox,
               Center(
                 child: ChateoAvatar(
-                  radius: 50,
+                  size: 100,
+                  seed: ref.read(profileRepositoryProvider).currentUid,
                   initials: _initials,
                   imageBytes: _imageBytes,
                   onTap: _pickImage,

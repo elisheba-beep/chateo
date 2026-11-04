@@ -1,106 +1,137 @@
 import 'dart:typed_data';
 
 import 'package:chateo/core/theme/app_colors.dart';
+import 'package:chateo/core/theme/avatar_palette.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'dart:convert';
+enum StoryRing { none, seen, unseen }
 
 class ChateoAvatar extends StatelessWidget {
-  final String? imageUrl;
-  final String? base64Image;
-  final String? initials;
-  final double radius;
-  final bool isOnline;
-  final VoidCallback? onTap;
-  final Uint8List? imageBytes;
-
   const ChateoAvatar({
     super.key,
     this.imageUrl,
-    this.base64Image,
-    this.initials,
-    this.radius = 50,
-    this.isOnline = false,
-    this.onTap,
     this.imageBytes,
+    this.initials,
+    this.seed,
+    this.size = 50,
+    this.isOnline = false,
+    this.ring = StoryRing.none,
+    this.onTap,
   });
+
+  final String? imageUrl;
+  final Uint8List? imageBytes;
+  final String? initials;
+  final String? seed; 
+  final double size;
+  final bool isOnline;
+  final StoryRing ring;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    ImageProvider? getAvatarImage() {
-      if (imageBytes != null) return MemoryImage(imageBytes!);
-      if (imageUrl != null && imageUrl!.isNotEmpty) {
-        return NetworkImage(imageUrl!);
-      }
-      if (base64Image != null && base64Image!.isNotEmpty) {
-        return MemoryImage(base64Decode(base64Image!));
-      }
-      return null;
-    }
+    final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
+    final hasRing = ring != StoryRing.none;
+    final inner = hasRing ? size - 8 : size; 
 
-    final avatarImage = getAvatarImage();
+    Widget face = ClipRRect(
+      borderRadius: BorderRadius.circular(inner * 0.32),
+      child: SizedBox(width: inner, height: inner, child: _content(inner)),
+    );
+
+    if (hasRing) {
+      face = Container(
+        width: size,
+        height: size,
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size * 0.36),
+          gradient: ring == StoryRing.unseen
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.primaryBrand, Color(0xFF8E7CFF)],
+                )
+              : null,
+          color: ring == StoryRing.seen
+              ? AppColors.mutedLight.withValues(alpha: 0.4)
+              : null,
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: scaffoldBg,
+            borderRadius: BorderRadius.circular(size * 0.34),
+          ),
+          child: face,
+        ),
+      );
+    }
 
     return GestureDetector(
       onTap: onTap,
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16.0),
-            child: Container(
-              width: 50,
-              height: 50,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: isOnline ? Colors.transparent : AppColors.primaryBrand,
-                  width: isOnline ? 0 : 2,
-                ),
-                borderRadius: BorderRadius.circular(16.0),
-                image: avatarImage != null
-                    ? DecorationImage(image: avatarImage, fit: BoxFit.cover)
-                    : null,
-                color: avatarImage == null ? AppColors.offWhiteLight : null,
-              ),
-              child: avatarImage == null
-                  ? (initials != null && initials!.isNotEmpty)
-                        ? Center(
-                            child: Text(
-                              initials!.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(
-                                  0xFF002DE3,
-                                ), // Primary Brand Color
-                              ),
-                            ),
-                          )
-                        : Icon(
-                            Icons.person_outline_rounded,
-                            size: radius * 0.9,
-                            color: const Color(0xFFADB5BD),
-                          )
-                  : null,
-            ),
-          ),
-          if (isOnline)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2CC069), // AppColors.success
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.activeDark, // Matches Scaffold Background
-                    width: 2,
+      child: SizedBox.square(
+        dimension: size,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            face,
+            if (isOnline)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: AppColors.success,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: scaffoldBg, width: 2),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _content(double dimension) {
+    if (imageBytes != null) {
+      return Image.memory(imageBytes!, fit: BoxFit.cover, gaplessPlayback: true);
+    }
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return Image.network(imageUrl!, fit: BoxFit.cover);
+    }
+
+    final hasInitials = initials != null && initials!.isNotEmpty;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: avatarColorsFor(seed),
+        ),
+      ),
+      child: Center(
+        child: hasInitials
+            ? Text(
+                initials!.toUpperCase(),
+                textHeightBehavior: const TextHeightBehavior(
+                  leadingDistribution: TextLeadingDistribution.even,
+                ),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: dimension * 0.36,
+                  height: 1,
+                ),
+              )
+            : Icon(
+                Icons.person_outline_rounded,
+                size: dimension * 0.5,
+                color: Colors.white70,
+              ),
       ),
     );
   }

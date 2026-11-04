@@ -37,6 +37,7 @@ class StoriesRow extends ConsumerWidget {
       ),
       for (final group in feed.others)
         _StoryTile(
+          seed: mine != null ? me?.uid : group.user.uid,
           label: group.user.firstName,
           imageBytes: group.user.imageBytes,
           initials: group.user.initials,
@@ -69,6 +70,7 @@ class _StoryTile extends StatelessWidget {
     this.isAdd = false,
     this.showAddBadge = false,
     this.onAddTap,
+    this.seed,
   });
 
   final String label;
@@ -79,6 +81,7 @@ class _StoryTile extends StatelessWidget {
   final bool isAdd;
   final bool showAddBadge;
   final VoidCallback? onAddTap;
+  final String? seed;
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +120,7 @@ class _StoryTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
               ),
               child: StoryAvatar(
+                seed:seed,
                 size: 52,
                 imageBytes: imageBytes,
                 initials: initials,

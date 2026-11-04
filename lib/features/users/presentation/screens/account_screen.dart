@@ -21,7 +21,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   void _snack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<bool> _confirm({
@@ -44,7 +45,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(
               action,
-              style: destructive ? const TextStyle(color: AppColors.danger) : null,
+              style: destructive
+                  ? const TextStyle(color: AppColors.danger)
+                  : null,
             ),
           ),
         ],
@@ -74,7 +77,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   Future<void> _deleteAccount() async {
     final ok = await _confirm(
       title: 'Delete account?',
-      body: 'This permanently deletes your profile. We’ll text a code to '
+      body:
+          'This permanently deletes your profile. We’ll text a code to '
           'your number to confirm it’s you.',
       action: 'Continue',
       destructive: true,
@@ -94,17 +98,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           context: context,
           builder: (_) => const _CodeDialog(),
         );
-        if (code == null) return; 
+        if (code == null) return;
         if (!mounted) return;
         setState(() => _busy = true);
       }
 
       await repo.deleteAccount(verificationId: verificationId, smsCode: code);
-      
     } on FirebaseAuthException catch (e) {
-      _snack(e.code == 'invalid-verification-code'
-          ? 'That code is wrong. Try again.'
-          : (e.message ?? e.code));
+      _snack(
+        e.code == 'invalid-verification-code'
+            ? 'That code is wrong. Try again.'
+            : (e.message ?? e.code),
+      );
     } catch (e) {
       _snack('Couldn’t delete account: $e');
     } finally {
@@ -147,7 +152,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: ChateoAvatar(
-                  radius: 24,
+                  size: 48,
+                  seed: profile?.uid,
                   imageBytes: profile?.imageBytes,
                   initials: profile?.initials,
                 ),
@@ -165,7 +171,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 enabled: !_busy,
-                leading: const Icon(Icons.delete_outline, color: AppColors.danger),
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.danger,
+                ),
                 title: const Text(
                   'Delete account',
                   style: TextStyle(color: AppColors.danger),
@@ -179,7 +188,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     );
   }
 }
-
 
 class _CodeDialog extends StatefulWidget {
   const _CodeDialog();
@@ -206,7 +214,10 @@ class _CodeDialogState extends State<_CodeDialog> {
         autofocus: true,
         keyboardType: TextInputType.number,
         maxLength: 6,
-        decoration: const InputDecoration(counterText: '', hintText: '6-digit code'),
+        decoration: const InputDecoration(
+          counterText: '',
+          hintText: '6-digit code',
+        ),
       ),
       actions: [
         TextButton(
