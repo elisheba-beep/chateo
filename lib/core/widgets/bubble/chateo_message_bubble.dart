@@ -72,107 +72,138 @@ class ChateoMessageBubble extends StatelessWidget {
       ],
     );
 
+    final radius = BorderRadius.only(
+      topLeft: const Radius.circular(16),
+      topRight: const Radius.circular(16),
+      bottomLeft: Radius.circular(isMine ? 16 : 4),
+      bottomRight: Radius.circular(isMine ? 4 : 16),
+    );
+
+    final decoration = BoxDecoration(
+      borderRadius: radius,
+      color: isMine ? null : background,
+      gradient: isMine
+          ? LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color.lerp(background, Colors.white, 0.10)!, background],
+            )
+          : null,
+      boxShadow: isLight
+          ? [
+              BoxShadow(
+                color: (isMine ? AppColors.primaryBrand : Colors.black)
+                    .withValues(alpha: isMine ? 0.18 : 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ]
+          : null,
+    );
+
     Widget bubbleContent = Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.sizeOf(context).width * 0.75,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: isMine
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onLongPress: onLongPress,
-              child: IntrinsicWidth(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-                  decoration: BoxDecoration(
-                    color: background,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: selected ? [
-                      BoxShadow(
-                        color: Theme.of(context).shadowColor.withValues(alpha: .22),
-                        blurRadius: 22,
-                        spreadRadius: 2,
-                      ),
-                    ]:null
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (deleted || edited)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
-                            deleted ? '(this message was deleted)' : '(edited)',
-                            style: metaStyle.copyWith(
-                              fontStyle: FontStyle.italic,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: reactions.isNotEmpty ? 12 : 0),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              GestureDetector(
+                onLongPress: onLongPress,
+                child: IntrinsicWidth(
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+                    decoration: decoration,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (deleted || edited)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              deleted
+                                  ? '(this message was deleted)'
+                                  : '(edited)',
+                              style: metaStyle.copyWith(
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
                           ),
-                        ),
-                      if (reply != null && !deleted)
-                        ReplyQuote(
-                          author: replyAuthor,
-                          text: reply!.text,
-                          isMine: isMine,
-                          isLight: isLight,
-                        ),
-                      if (deleted)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Icon(
-                            Icons.block,
-                            size: 20,
-                            color: textColor.withValues(alpha: 0.7),
+                        if (reply != null && !deleted)
+                          ReplyQuote(
+                            author: replyAuthor,
+                            text: reply!.text,
+                            isMine: isMine,
+                            isLight: isLight,
                           ),
-                        )
-                      else
-                        Text(
-                          text,
-                          style: AppTextStyles.bodyTextMedium.copyWith(
-                            color: textColor,
-                          ),
-                        ),
-                      6.heightBox,
-                      showMenu
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: isMine
-                                  ? [
-                                      _MoreMenu(
-                                        color: metaColor,
-                                        onEdit: onEdit,
-                                        onDelete: onDelete,
-                                      ),
-                                      footerMeta,
-                                    ]
-                                  : [
-                                      footerMeta,
-                                      _MoreMenu(
-                                        color: metaColor,
-                                        onEdit: onEdit,
-                                        onDelete: onDelete,
-                                      ),
-                                    ],
-                            )
-                          : Align(
-                              alignment: isMine
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: footerMeta,
+                        if (deleted)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Icon(
+                              Icons.block,
+                              size: 20,
+                              color: textColor.withValues(alpha: 0.7),
                             ),
-                    ],
+                          )
+                        else
+                          Text(
+                            text,
+                            style: AppTextStyles.bodyTextMedium.copyWith(
+                              color: textColor,
+                            ),
+                          ),
+                        6.heightBox,
+                        showMenu
+                            ? Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: isMine
+                                    ? [
+                                        _MoreMenu(
+                                          color: metaColor,
+                                          onEdit: onEdit,
+                                          onDelete: onDelete,
+                                        ),
+                                        footerMeta,
+                                      ]
+                                    : [
+                                        footerMeta,
+                                        _MoreMenu(
+                                          color: metaColor,
+                                          onEdit: onEdit,
+                                          onDelete: onDelete,
+                                        ),
+                                      ],
+                              )
+                            : Align(
+                                alignment: isMine
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
+                                child: footerMeta,
+                              ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            if (reactions.isNotEmpty)
-              _ReactionPill(reactions: reactions, isLight: isLight),
-          ],
+              if (reactions.isNotEmpty)
+                Positioned(
+                  bottom: -15,
+                  left: isMine ? null : 15,
+                  right: isMine ? 15 : null,
+                  child: _ReactionPill(
+                    reactions: reactions,
+                    isLight: isLight,
+                    isMine: isMine,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -287,9 +318,14 @@ class _Tick extends StatelessWidget {
 }
 
 class _ReactionPill extends StatelessWidget {
-  const _ReactionPill({required this.reactions, required this.isLight});
+  const _ReactionPill({
+    required this.reactions,
+    required this.isLight,
+    required this.isMine,
+  });
   final Map<String, String> reactions;
   final bool isLight;
+  final bool isMine;
 
   @override
   Widget build(BuildContext context) {
@@ -305,10 +341,14 @@ class _ReactionPill extends StatelessWidget {
       margin: const EdgeInsets.only(top: 2),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: isLight ? AppColors.whiteLight : AppColors.offWhiteDark,
+        color: isMine
+            ? (isLight ? AppColors.primaryBrand : AppColors.primaryDark)
+            : (isLight ? AppColors.offWhiteLight : AppColors.offWhiteDark),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isLight ? AppColors.lineLight : AppColors.lineDark,
+          color: isMine
+              ? (isLight ? AppColors.primaryLight : AppColors.primaryDark)
+              : (isLight ? AppColors.lineLight : AppColors.lineDark),
         ),
       ),
       child: Text(summary, style: const TextStyle(fontSize: 12)),
