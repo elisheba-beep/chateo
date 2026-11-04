@@ -1,6 +1,7 @@
 import 'package:chateo/core/theme/app_colors.dart';
 import 'package:chateo/core/theme/app_text_styles.dart';
 import 'package:chateo/core/utils/chat_time.dart';
+import 'package:chateo/core/widgets/backgrounds/chat_doodle_background.dart';
 import 'package:chateo/core/widgets/bubble/chateo_message_bubble.dart';
 import 'package:chateo/core/widgets/divider/chateo_date_divider.dart';
 import 'package:chateo/core/widgets/input/chateo_chat_input_bar.dart';
@@ -448,122 +449,129 @@ class _IndividualChatScreenState extends ConsumerState<IndividualChatScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: messages.when(
-                data: (list) {
-                  if (list.isEmpty) {
-                    return Center(
-                      child: Text('Say hi to ${widget.user.firstName}'),
+      body: ChatDoodleBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: messages.when(
+                  data: (list) {
+                    if (list.isEmpty) {
+                      return Center(
+                        child: Text('Say hi to ${widget.user.firstName}'),
+                      );
+                    }
+                    return ListView.builder(
+                      reverse: true,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      itemCount: list.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final message = list[index];
+                        final at = message.createdAt ?? DateTime.now();
+                        final isMine = message.senderId == _me;
+
+                        final hasOlder = index + 1 < list.length;
+                        final showDate =
+                            !hasOlder ||
+                            !isSameDay(at, list[index + 1].createdAt ?? at);
+
+                        final byId = {for (final m in list) m.id: m};
+                        final quoted = message.replyTo;
+                        final original = quoted == null
+                            ? null
+                            : byId[quoted.messageId];
+                        final resolvedReply = quoted == null
+                            ? null
+                            : ReplyRef(
+                                messageId: quoted.messageId,
+                                senderId: quoted.senderId,
+                                text: original == null
+                                    ? quoted.text
+                                    : (original.deleted
+                                          ? 'This message was deleted'
+                                          : original.text),
+                              );
+
+                        final bubble = ChateoMessageBubble(
+                          text: message.text,
+                          time: formatClock(at),
+                          isMine: isMine,
+                          status: isMine
+                              ? ChatRoom.statusFor(
+                                  message,
+                                  room,
+                                  widget.user.uid,
+                                )
+                              : null,
+                          reactions: message.reactions,
+                          reply: resolvedReply,
+                          replyAuthor: message.replyTo?.senderId == _me
+                              ? 'You'
+                              : widget.user.firstName,
+                          edited: message.edited,
+                          deleted: message.deleted,
+                          onLongPress: message.deleted
+                              ? null
+                              : () => _selectMessage(message),
+                          onSwipeToReply: message.deleted
+                              ? null
+                              : () => reply(message),
+                        );
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (showDate)
+                              ChateoDateDivider(dateText: dayLabel(at)),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: message.id == _selectedMessage?.id
+                                  ? CompositedTransformTarget(
+                                      key: _selectedBubbleKey,
+                                      link: _selectionLink,
+                                      child: bubble,
+                                    )
+                                  : bubble,
+                            ),
+                          ],
+                        );
+                      },
                     );
-                  }
-                  return ListView.builder(
-                    reverse: true,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+                  },
+                  error: (e, _) => Center(
+                    child: Text(
+                      'could not load messages.\n$e',
+                      textAlign: TextAlign.center,
                     ),
-                    itemCount: list.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final message = list[index];
-                      final at = message.createdAt ?? DateTime.now();
-                      final isMine = message.senderId == _me;
-
-                      final hasOlder = index + 1 < list.length;
-                      final showDate =
-                          !hasOlder ||
-                          !isSameDay(at, list[index + 1].createdAt ?? at);
-
-                      final byId = {for (final m in list) m.id: m};
-                      final quoted = message.replyTo;
-                      final original = quoted == null
-                          ? null
-                          : byId[quoted.messageId];
-                      final resolvedReply = quoted == null
-                          ? null
-                          : ReplyRef(
-                              messageId: quoted.messageId,
-                              senderId: quoted.senderId,
-                              text: original == null
-                                  ? quoted.text
-                                  : (original.deleted
-                                        ? 'This message was deleted'
-                                        : original.text),
-                            );
-
-                      final bubble = ChateoMessageBubble(
-                        text: message.text,
-                        time: formatClock(at),
-                        isMine: isMine,
-                        status: isMine
-                            ? ChatRoom.statusFor(message, room, widget.user.uid)
-                            : null,
-                        reactions: message.reactions,
-                        reply: resolvedReply,
-                        replyAuthor: message.replyTo?.senderId == _me
-                            ? 'You'
-                            : widget.user.firstName,
-                        edited: message.edited,
-                        deleted: message.deleted,
-                        onLongPress: message.deleted
-                            ? null
-                            : () => _selectMessage(message),
-                        onSwipeToReply: message.deleted
-                            ? null
-                            : () => reply(message),
-                      );
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (showDate)
-                            ChateoDateDivider(dateText: dayLabel(at)),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: message.id == _selectedMessage?.id
-                                ? CompositedTransformTarget(
-                                    key: _selectedBubbleKey,
-                                    link: _selectionLink,
-                                    child: bubble,
-                                  )
-                                : bubble,
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                error: (e, _) => Center(
-                  child: Text(
-                    'could not load messages.\n$e',
-                    textAlign: TextAlign.center,
                   ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                 ),
-                loading: () => const Center(child: CircularProgressIndicator()),
               ),
-            ),
-            ChateoChatInputBar(
-              controller: _controller,
-              focusNode: _focus,
-              onSendPressed: _send,
-              header: _editing != null
-                  ? ReplyPreview(
-                      author: 'Edit message',
-                      text: _editing!.text,
-                      onClose: _cancelEdit,
-                    )
-                  : (_replyingTo == null
-                        ? null
-                        : ReplyPreview(
-                            author: _replyingTo!.senderId == _me
-                                ? 'You'
-                                : widget.user.firstName,
-                            text: _replyingTo!.text,
-                            onClose: () => setState(() => _replyingTo = null),
-                          )),
-            ),
-          ],
+              ChateoChatInputBar(
+                controller: _controller,
+                focusNode: _focus,
+                onSendPressed: _send,
+                header: _editing != null
+                    ? ReplyPreview(
+                        author: 'Edit message',
+                        text: _editing!.text,
+                        onClose: _cancelEdit,
+                      )
+                    : (_replyingTo == null
+                          ? null
+                          : ReplyPreview(
+                              author: _replyingTo!.senderId == _me
+                                  ? 'You'
+                                  : widget.user.firstName,
+                              text: _replyingTo!.text,
+                              onClose: () => setState(() => _replyingTo = null),
+                            )),
+              ),
+            ],
+          ),
         ),
       ),
     );
